@@ -1,18 +1,14 @@
 package com.janek.maowithfriends.ui;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.util.Patterns;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.jakewharton.rxbinding2.widget.RxTextView;
 import com.janek.maowithfriends.R;
@@ -28,6 +24,7 @@ public class LoginActivity extends AppCompatActivity {
     @BindView(R.id.passwordLoginEditText) EditText passwordLoginEditText;
     @BindView(R.id.loginBtn) Button loginBtn;
 
+    ProgressDialog loading;
     CompositeDisposable disposable = new CompositeDisposable();
     FirebaseAuth mAuth;
     FirebaseAuth.AuthStateListener mAuthListener;
@@ -38,14 +35,17 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
 
-        mAuth = FirebaseAuth.getInstance();
+        loading = new ProgressDialog(this);
+        loading.setMessage("Authenticating. Please Wait...");
+        loading.setCancelable(false);
 
+        mAuth = FirebaseAuth.getInstance();
         mAuthListener = this::authListen;
 
         disposable.add(Observable.combineLatest(
                 RxTextView.textChanges(emailLoginEditText).skipInitialValue(),
                 RxTextView.textChanges(passwordLoginEditText).skipInitialValue(),
-                (CharSequence emailInput, CharSequence passwordInput) -> validateEmail(emailInput) && validatePassword(passwordInput))
+                (emailInput, passwordInput) -> validateEmail(emailInput.toString().trim()) && validatePassword(passwordInput.toString().trim()))
                 .subscribe(valid -> loginBtn.setEnabled(valid)));
     }
 
@@ -67,7 +67,7 @@ public class LoginActivity extends AppCompatActivity {
         if (mAuthListener != null) mAuth.removeAuthStateListener(mAuthListener);
     }
 
-    private boolean validateEmail(CharSequence email) {
+    private boolean validateEmail(String email) {
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             emailLoginEditText.setError("Please enter a valid email.");
             return false;
@@ -75,7 +75,7 @@ public class LoginActivity extends AppCompatActivity {
         return true;
     }
 
-    private boolean validatePassword(CharSequence password) {
+    private boolean validatePassword(String password) {
         if (!(password.length() > 6)) {
             passwordLoginEditText.setError("Password must be more than 6 characters in length.");
             return false;
@@ -101,7 +101,10 @@ public class LoginActivity extends AppCompatActivity {
     public void login() {
         String email = emailLoginEditText.getText().toString().trim();
         String password = passwordLoginEditText.getText().toString().trim();
+
+        loading.show();
         mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
+            loading.dismiss();
             if (!task.isSuccessful()) {
                 Toast.makeText(this, "Authentication failed, Please try again.", Toast.LENGTH_SHORT).show();
             }

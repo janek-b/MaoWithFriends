@@ -1,5 +1,6 @@
 package com.janek.maowithfriends.ui;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -8,8 +9,11 @@ import android.util.Log;
 import android.util.Patterns;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.jakewharton.rxbinding2.widget.RxTextView;
 import com.janek.maowithfriends.R;
 
@@ -26,6 +30,7 @@ public class RegisterActivity extends AppCompatActivity {
     @BindView(R.id.confirmRegisterEditText) EditText confirmRegisterEditText;
     @BindView(R.id.registerBtn) Button registerBtn;
 
+    ProgressDialog loading;
     CompositeDisposable disposable = new CompositeDisposable();
     FirebaseAuth mAuth;
 
@@ -35,6 +40,10 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
         ButterKnife.bind(this);
 
+        loading = new ProgressDialog(this);
+        loading.setMessage("Creating Account. Please Wait...");
+        loading.setCancelable(false);
+
         mAuth = FirebaseAuth.getInstance();
 
         disposable.add(Observable.combineLatest(
@@ -42,10 +51,10 @@ public class RegisterActivity extends AppCompatActivity {
                 RxTextView.textChanges(emailRegisterEditText).skipInitialValue(),
                 RxTextView.textChanges(passwordRegisterEditText).skipInitialValue(),
                 RxTextView.textChanges(confirmRegisterEditText).skipInitialValue(),
-                (CharSequence nameInput, CharSequence emailInput, CharSequence passwordInput, CharSequence confirmInput) -> {
-                    boolean validName = validateName(nameInput);
-                    boolean validEmail = validateEmail(emailInput);
-                    boolean validPassword = validatePassword(passwordInput, confirmInput);
+                (nameInput, emailInput, passwordInput, confirmInput) -> {
+                    boolean validName = validateName(nameInput.toString().trim());
+                    boolean validEmail = validateEmail(emailInput.toString().trim());
+                    boolean validPassword = validatePassword(passwordInput.toString().trim(), confirmInput.toString().trim());
                     return validName && validEmail && validPassword;
                 }).subscribe(valid -> registerBtn.setEnabled(valid)));
     }
@@ -56,7 +65,7 @@ public class RegisterActivity extends AppCompatActivity {
         disposable.clear();
     }
 
-    private boolean validateName(CharSequence name) {
+    private boolean validateName(String name) {
         if (TextUtils.isEmpty(name)) {
             nameEditText.setError("Please enter a name.");
             return false;
@@ -64,7 +73,7 @@ public class RegisterActivity extends AppCompatActivity {
         return true;
     }
 
-    private boolean validateEmail(CharSequence email) {
+    private boolean validateEmail(String email) {
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             emailRegisterEditText.setError("Please enter a valid email address.");
             return false;
@@ -72,7 +81,7 @@ public class RegisterActivity extends AppCompatActivity {
         return true;
     }
 
-    private boolean validatePassword(CharSequence password, CharSequence confirm) {
+    private boolean validatePassword(String password, String confirm) {
         if (!(password.length() > 6)) {
             passwordRegisterEditText.setError("Password must be more than 6 characters in length.");
             return false;
@@ -93,6 +102,34 @@ public class RegisterActivity extends AppCompatActivity {
 
     @OnClick(R.id.registerBtn)
     public void register() {
-        Log.d("RegisterActivity", "register new account");
+        String name = nameEditText.getText().toString().trim();
+        String email = emailRegisterEditText.getText().toString().trim();
+        String password = passwordRegisterEditText.getText().toString().trim();
+
+        loading.show();
+        mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                updateProfile(task.getResult().getUser(), name);
+            } else {
+                Toast.makeText(this, "Registration failed, please try again.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void updateProfile(FirebaseUser user, String name) {
+        UserProfileChangeRequest profileUpdate = new UserProfileChangeRequest.Builder().setDisplayName(name).build();
+
+        user.updateProfile(profileUpdate).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                loading.dismiss();
+
+                // TODO: add user object creation.
+
+                Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
+            }
+        });
     }
 }
