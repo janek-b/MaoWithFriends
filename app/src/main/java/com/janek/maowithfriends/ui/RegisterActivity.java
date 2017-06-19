@@ -14,8 +14,12 @@ import android.widget.Toast;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.jakewharton.rxbinding2.widget.RxTextView;
+import com.janek.maowithfriends.Constants;
 import com.janek.maowithfriends.R;
+import com.janek.maowithfriends.model.User;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -121,14 +125,18 @@ public class RegisterActivity extends AppCompatActivity {
 
         user.updateProfile(profileUpdate).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                loading.dismiss();
+                User newUser = new User(user.getUid(), user.getDisplayName(), Constants.DEFAULT_USER_IMG);
+                DatabaseReference newUserRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_USER_REF).child(user.getUid());
 
-                // TODO: add user object creation.
-
-                Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                finish();
+                newUserRef.setValue(newUser).addOnCompleteListener(saveTask -> {
+                    if (saveTask.isSuccessful()) {
+                        loading.dismiss();
+                        Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        finish();
+                    }
+                });
             }
         });
     }
