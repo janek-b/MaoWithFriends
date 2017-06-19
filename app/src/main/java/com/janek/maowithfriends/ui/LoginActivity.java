@@ -103,7 +103,7 @@ public class LoginActivity extends AppCompatActivity {
         String password = passwordLoginEditText.getText().toString().trim();
 
         loading.show();
-        mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
+        mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
             loading.dismiss();
             if (!task.isSuccessful()) {
                 Toast.makeText(this, "Authentication failed, Please try again.", Toast.LENGTH_SHORT).show();

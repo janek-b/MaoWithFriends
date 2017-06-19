@@ -25,4 +25,9 @@ public class User {
     public String getImageUrl() {
         return imageUrl;
     }
+
+    @Override
+    public String toString() {
+        return this.name;
+    }
 }
