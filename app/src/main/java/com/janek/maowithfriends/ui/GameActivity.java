@@ -19,6 +19,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.janek.maowithfriends.Constants;
 import com.janek.maowithfriends.R;
 import com.janek.maowithfriends.adapter.PlayerHandAdapter;
+import com.janek.maowithfriends.model.Card;
 import com.janek.maowithfriends.model.Game;
 
 import org.parceler.Parcels;
@@ -37,6 +38,8 @@ public class GameActivity extends AppCompatActivity {
     @BindView(R.id.currentTurnPlayer) TextView currentTurnPlayer;
     @BindView(R.id.playerHandRecycleView) RecyclerView playerHandRecyclerView;
     @BindView(R.id.nextTurnBtn) Button nextTurnBtn;
+    @BindView(R.id.discardCardSuit) TextView discardCardSuit;
+    @BindView(R.id.discardCardValue) TextView discardCardValue;
 
     PlayerHandAdapter playerHandAdapter;
 
@@ -76,11 +79,17 @@ public class GameActivity extends AppCompatActivity {
 
     private void setGameState(Game game) {
         currentTurnPlayer.setText(game.currentTurnPlayer().getName());
+        updateDiscardCard(game.getDiscard().get(0));
 
         nextTurnBtn.setOnClickListener(view -> {
             game.nextTurn();
 //            updateFirebase(game);
         });
+    }
+
+    private void updateDiscardCard(Card discardCard) {
+        discardCardSuit.setText(discardCard.getSuit().toString());
+        discardCardValue.setText(discardCard.getCardValue().toString());
     }
 
     private void updateFirebase(Game game) {
