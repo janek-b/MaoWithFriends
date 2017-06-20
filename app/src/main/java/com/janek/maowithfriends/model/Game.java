@@ -1,5 +1,7 @@
 package com.janek.maowithfriends.model;
 
+import android.util.Log;
+
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.janek.maowithfriends.Constants;
@@ -56,6 +58,18 @@ public class Game {
         return getPlayers().get(currentPlayer);
     }
 
+    public Card topDiscardCard() {
+        return this.discard.get(this.discard.size() - 1);
+    }
+
+    public void playCard(String playerId, int cardIndex) {
+        Log.d("test", "playCard");
+        if (this.currentPlayer.equals(playerId)) {
+            this.discard.add(getPlayers().get(playerId).getHand().remove(cardIndex));
+            nextTurn();
+        }
+    }
+
     public void nextTurn() {
         this.currentPlayer = this.nextPlayerTurn.get(this.currentPlayer);
         updateGameState();
@@ -65,8 +79,8 @@ public class Game {
         this.deck = Game.createNewDeck();
         this.nextPlayerTurn = Game.calculateTurns(getPlayers());
         dealCards();
-        if (discard.size() == 0) {
-            discard.add(drawCard());
+        if (this.discard.size() == 0) {
+            this.discard.add(drawCard());
         }
     }
 

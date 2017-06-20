@@ -79,10 +79,16 @@ public class GameActivity extends AppCompatActivity {
 
     private void setGameState(Game game) {
         currentTurnPlayer.setText(game.currentTurnPlayer().getName());
-        updateDiscardCard(game.getDiscard().get(0));
+        updateDiscardCard(game.topDiscardCard());
+
+        playerHandAdapter.notifyDataSetChanged();
 
         nextTurnBtn.setOnClickListener(view -> {
-            game.nextTurn();
+            if (game.getCurrentPlayer().equals(currentUser.getUid())) {
+                game.playCard(currentUser.getUid(), 0);
+            } else {
+                game.nextTurn();
+            }
 //            updateFirebase(game);
         });
     }
