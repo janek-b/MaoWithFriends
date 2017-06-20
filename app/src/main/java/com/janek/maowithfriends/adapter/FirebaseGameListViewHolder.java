@@ -33,7 +33,7 @@ public class FirebaseGameListViewHolder extends RecyclerView.ViewHolder implemen
     public void bindGame(Game game) {
         this.game = game;
         gameIdTextView.setText(game.getGameId());
-        currentPlayerTextView.setText(game.getPlayers().get(game.getCurrentPlayer()).getName());
+        currentPlayerTextView.setText(game.currentTurnPlayer().getName());
     }
 
     @Override

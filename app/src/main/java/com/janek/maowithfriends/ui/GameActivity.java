@@ -75,11 +75,11 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void setGameState(Game game) {
-        currentTurnPlayer.setText(game.getPlayers().get(game.getCurrentPlayer()).getName());
+        currentTurnPlayer.setText(game.currentTurnPlayer().getName());
 
         nextTurnBtn.setOnClickListener(view -> {
             game.nextTurn();
-            updateFirebase(game);
+//            updateFirebase(game);
         });
     }
 

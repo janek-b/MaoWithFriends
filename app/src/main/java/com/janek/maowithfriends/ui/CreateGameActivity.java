@@ -75,7 +75,6 @@ public class CreateGameActivity extends AppCompatActivity {
             @Override public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
                     User user = userSnapshot.getValue(User.class);
-//                    User user = User.create(userSnapshot);
                     if (user.getUserId().equals(currentUser.getUid())) {
                         userObject = user;
                     } else {
@@ -123,7 +122,6 @@ public class CreateGameActivity extends AppCompatActivity {
             updates.put(String.format(Constants.FIREBASE_USER_GAME_REF, player.getUserId(), gameKey), true);
             newGame.addPlayer(new Player(player.getUserId(), player.getName(), player.getImageUrl()));
         }
-//        newGame.dealCards();
         newGame.startGame();
         updates.put(String.format("%s/%s", Constants.FIREBASE_GAME_REF, gameKey), newGame);
 

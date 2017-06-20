@@ -1,5 +1,9 @@
 package com.janek.maowithfriends.model;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.janek.maowithfriends.Constants;
+
 import org.parceler.Parcel;
 
 import java.util.ArrayList;
@@ -48,18 +52,19 @@ public class Game {
         this.players.put(player.getUserId(), player);
     }
 
+    public Player currentTurnPlayer() {
+        return getPlayers().get(currentPlayer);
+    }
+
     public void nextTurn() {
         this.currentPlayer = this.nextPlayerTurn.get(this.currentPlayer);
+        updateGameState();
     }
 
     public void startGame() {
-        this.deck = Game.createNewDeck(); // create new deck
-
-        this.nextPlayerTurn = Game.calculateTurns(getPlayers()); // calculate player turn order
-
-        dealCards(); // distribute starting cards
-
-        // start discard pile
+        this.deck = Game.createNewDeck();
+        this.nextPlayerTurn = Game.calculateTurns(getPlayers());
+        dealCards();
         if (discard.size() == 0) {
             discard.add(drawCard());
         }
@@ -100,6 +105,11 @@ public class Game {
 
     private Card drawCard() {
         return deck.remove(0);
+    }
+
+    private void updateGameState() {
+        DatabaseReference gameRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_GAME_REF).child(getGameId());
+        gameRef.setValue(this);
     }
 
 }
