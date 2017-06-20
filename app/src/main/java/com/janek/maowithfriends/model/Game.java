@@ -63,9 +63,15 @@ public class Game {
     }
 
     public void playCard(String playerId, int cardIndex) {
-        Log.d("test", "playCard");
         if (this.currentPlayer.equals(playerId)) {
             this.discard.add(getPlayers().get(playerId).getHand().remove(cardIndex));
+            nextTurn();
+        }
+    }
+
+    public void playerDrawCard(String playerId) {
+        if (this.currentPlayer.equals(playerId)) {
+            getPlayers().get(playerId).drawCard(drawCard());
             nextTurn();
         }
     }
@@ -124,6 +130,23 @@ public class Game {
     private void updateGameState() {
         DatabaseReference gameRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_GAME_REF).child(getGameId());
         gameRef.setValue(this);
+    }
+
+    public boolean validCard(Card card) {
+        boolean matchingSuit = topDiscardCard().getSuit().equals(card.getSuit());
+        boolean matchingValue = topDiscardCard().getCardValue().equals(card.getCardValue());
+        return matchingSuit || matchingValue;
+    }
+
+    public boolean validCardInHand(String playerId) {
+        List<Card> playerHand = getPlayers().get(playerId).getHand();
+        for (Card card : playerHand) {
+            boolean valid = validCard(card);
+            if (valid) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

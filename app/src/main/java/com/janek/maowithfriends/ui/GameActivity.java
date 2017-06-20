@@ -27,6 +27,7 @@ import org.parceler.Parcels;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class GameActivity extends AppCompatActivity {
     @BindView(R.id.currentTurnPlayer) TextView currentTurnPlayer;
@@ -34,11 +35,14 @@ public class GameActivity extends AppCompatActivity {
     @BindView(R.id.nextTurnBtn) Button nextTurnBtn;
     @BindView(R.id.discardCardSuit) TextView discardCardSuit;
     @BindView(R.id.discardCardValue) TextView discardCardValue;
+    @BindView(R.id.cardsLeft) TextView cardsLeft;
+    @BindView(R.id.cardsDiscarded) TextView cardsDiscarded;
 
     private FirebasePlayerHandAdapter firebasePlayerHandAdapter;
 
     private FirebaseAuth mAuth;
     private FirebaseUser currentUser;
+    private String uid;
     private DatabaseReference rootRef;
     private Game currentGame;
 
@@ -51,8 +55,9 @@ public class GameActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
+        uid = currentUser.getUid();
         rootRef = FirebaseDatabase.getInstance().getReference();
-        Query playerHandRef = rootRef.child(String.format(Constants.FIREBASE_PLAYER_HAND_REF, newGame.getGameId(), currentUser.getUid()));
+        Query playerHandRef = rootRef.child(String.format(Constants.FIREBASE_PLAYER_HAND_REF, newGame.getGameId(), uid));
 
         firebasePlayerHandAdapter = new FirebasePlayerHandAdapter(playerHandRef, this);
         playerHandRecyclerView.setAdapter(firebasePlayerHandAdapter);
@@ -77,21 +82,60 @@ public class GameActivity extends AppCompatActivity {
     }
 
     public void playCard(int index) {
-        if (currentGame.getCurrentPlayer().equals(currentUser.getUid())) {
-            currentGame.playCard(currentUser.getUid(), index);
-        } else {
-            Toast.makeText(this, "It is not your turn", Toast.LENGTH_SHORT).show();
+        if (checkPlayerTurn()) {
+            if (currentGame.validCardInHand(uid)) {
+                Card playedCard = currentGame.currentTurnPlayer().getHand().get(index);
+                if (currentGame.validCard(playedCard)) {
+                    currentGame.playCard(uid, index);
+                } else {
+                    Toast.makeText(this, "Card must be of the same suit or value", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(this, "You have no valid cards in hand, draw a new card", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
     private void setGameState(Game game) {
         currentGame = game;
-        currentTurnPlayer.setText(currentGame.currentTurnPlayer().getName());
+        updateTurnIndicator();
         updateDiscardCard(currentGame.topDiscardCard());
+        cardsLeft.setText(String.format("Cards Left: %d", currentGame.getDeck().size()));
+        cardsDiscarded.setText(String.format("Cards discarded: %d", currentGame.getDiscard().size()));
 
-        nextTurnBtn.setOnClickListener(view -> {
-            currentGame.nextTurn();
-        });
+    }
+
+    @OnClick(R.id.nextTurnBtn)
+    public void nextTurn() {
+        currentGame.nextTurn();
+    }
+
+    @OnClick(R.id.drawCardPile)
+    public void drawCard() {
+        if (checkPlayerTurn()) {
+            if (currentGame.validCardInHand(uid)) {
+                Toast.makeText(this, "You must play any valid card in hand before drawing", Toast.LENGTH_SHORT).show();
+            } else {
+                currentGame.playerDrawCard(uid);
+            }
+        }
+    }
+
+    private boolean checkPlayerTurn() {
+        if (currentGame.getCurrentPlayer().equals(uid)) {
+            return true;
+        } else {
+            Toast.makeText(this, "It is not your turn", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+    }
+
+    private void updateTurnIndicator() {
+        if (currentGame.getCurrentPlayer().equals(uid)) {
+            currentTurnPlayer.setText("Your turn");
+        } else {
+            currentTurnPlayer.setText(currentGame.currentTurnPlayer().getName());
+        }
     }
 
     private void updateDiscardCard(Card discardCard) {
