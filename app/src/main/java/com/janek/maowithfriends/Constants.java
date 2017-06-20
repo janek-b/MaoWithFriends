@@ -6,4 +6,5 @@ public class Constants {
     public static final String FIREBASE_USER_REF = "users";
     public static final String FIREBASE_GAME_REF = "games";
     public static final String FIREBASE_USER_GAME_REF = "users/%s/games/%s";
+    public static final String FIREBASE_USER_ALL_GAMES_REF = "users/%s/games";
 }

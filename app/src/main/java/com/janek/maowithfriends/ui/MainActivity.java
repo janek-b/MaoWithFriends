@@ -3,18 +3,35 @@ package com.janek.maowithfriends.ui;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.firebase.ui.database.FirebaseIndexRecyclerAdapter;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.janek.maowithfriends.Constants;
 import com.janek.maowithfriends.R;
+import com.janek.maowithfriends.adapter.FirebaseGameListViewHolder;
+import com.janek.maowithfriends.model.Game;
 
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity {
+    @BindView(R.id.gameListRecyclerView) RecyclerView gameListRecyclerView;
+
+    private FirebaseIndexRecyclerAdapter mFirebaseAdapter;
 
     private FirebaseAuth mAuth;
+    private FirebaseUser currentUser;
+    private DatabaseReference rootRef;
+    private DatabaseReference playerGameListRef;
+    private DatabaseReference gameRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +40,23 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         mAuth = FirebaseAuth.getInstance();
+        currentUser = mAuth.getCurrentUser();
+        rootRef = FirebaseDatabase.getInstance().getReference();
+        playerGameListRef = rootRef.child(String.format(Constants.FIREBASE_USER_ALL_GAMES_REF, currentUser.getUid()));
+        gameRef = rootRef.child(Constants.FIREBASE_GAME_REF);
+        setUpGameList();
+    }
+
+    private void setUpGameList() {
+        mFirebaseAdapter = new FirebaseIndexRecyclerAdapter<Game, FirebaseGameListViewHolder>(Game.class, R.layout.game_list_item, FirebaseGameListViewHolder.class, playerGameListRef, gameRef) {
+            @Override
+            protected void populateViewHolder(FirebaseGameListViewHolder viewHolder, Game model, int position) {
+                viewHolder.bindGame(model);
+            }
+        };
+        gameListRecyclerView.setHasFixedSize(true);
+        gameListRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        gameListRecyclerView.setAdapter(mFirebaseAdapter);
     }
 
     @Override

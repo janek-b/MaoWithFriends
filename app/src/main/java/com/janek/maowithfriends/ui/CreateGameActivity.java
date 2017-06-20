@@ -132,7 +132,6 @@ public class CreateGameActivity extends AppCompatActivity {
             if (task.isSuccessful()) {
                 Intent intent = new Intent(CreateGameActivity.this, GameActivity.class);
                 intent.putExtra("game", Parcels.wrap(newGame));
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 finish();
             } else {
