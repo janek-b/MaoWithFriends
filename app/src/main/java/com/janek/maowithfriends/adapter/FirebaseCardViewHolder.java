@@ -13,8 +13,7 @@ import butterknife.ButterKnife;
 
 
 public class FirebaseCardViewHolder extends RecyclerView.ViewHolder {
-    @BindView(R.id.cardSuit)
-    TextView cardSuit;
+    @BindView(R.id.cardSuit) TextView cardSuit;
     @BindView(R.id.cardValue) TextView cardValue;
 
     public View cardView;
@@ -30,6 +29,6 @@ public class FirebaseCardViewHolder extends RecyclerView.ViewHolder {
 
     public void bindCard(Card card) {
         cardSuit.setText(card.getSuit().toString());
-        cardValue.setText(card.getCardValue().toString());
+        cardValue.setText(card.getValue().toString());
     }
 }

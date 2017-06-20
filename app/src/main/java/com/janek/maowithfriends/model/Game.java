@@ -22,6 +22,7 @@ public class Game {
     Map<String, String> nextPlayerTurn = new HashMap<>();
     List<Card> deck = new ArrayList<>();
     List<Card> discard = new ArrayList<>();
+    int penalty = 0;
 
     public Game() {}
 
@@ -50,6 +51,10 @@ public class Game {
         return discard;
     }
 
+    public int getPenalty() {
+        return penalty;
+    }
+
     public void addPlayer(Player player) {
         this.players.put(player.getUserId(), player);
     }
@@ -64,14 +69,33 @@ public class Game {
 
     public void playCard(String playerId, int cardIndex) {
         if (this.currentPlayer.equals(playerId)) {
-            this.discard.add(getPlayers().get(playerId).getHand().remove(cardIndex));
+            processCard(getPlayers().get(playerId).getHand().remove(cardIndex));
+        }
+    }
+
+    private void processCard(Card card) {
+        this.discard.add(card);
+        if (card.getValue().getCardValue() == 14) {
+            nextTurn();
+            nextTurn();
+        } else if (card.getValue().getCardValue() == 7) {
+            this.penalty++;
+            nextTurn();
+        } else {
             nextTurn();
         }
     }
 
     public void playerDrawCard(String playerId) {
         if (this.currentPlayer.equals(playerId)) {
-            getPlayers().get(playerId).drawCard(drawCard());
+            if (this.penalty > 0) {
+                for (int i = 0; i < this.penalty; i++) {
+                    getPlayers().get(playerId).drawCard(drawCard());
+                }
+                this.penalty = 0;
+            } else {
+                getPlayers().get(playerId).drawCard(drawCard());
+            }
             nextTurn();
         }
     }
@@ -133,9 +157,14 @@ public class Game {
     }
 
     public boolean validCard(Card card) {
-        boolean matchingSuit = topDiscardCard().getSuit().equals(card.getSuit());
-        boolean matchingValue = topDiscardCard().getCardValue().equals(card.getCardValue());
-        return matchingSuit || matchingValue;
+        Card topCard = topDiscardCard();
+        if ((this.penalty > 0) && (topCard.getValue().getCardValue() == 7)) {
+            return topCard.getValue().equals(card.getValue());
+        } else {
+            boolean matchingSuit = topDiscardCard().getSuit().equals(card.getSuit());
+            boolean matchingValue = topDiscardCard().getValue().equals(card.getValue());
+            return matchingSuit || matchingValue;
+        }
     }
 
     public boolean validCardInHand(String playerId) {

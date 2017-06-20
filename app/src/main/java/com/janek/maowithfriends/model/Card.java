@@ -4,22 +4,22 @@ import org.parceler.Parcel;
 
 @Parcel
 public class Card {
-    CardValue cardValue;
+    CardValue value;
     Suit suit;
 
     public Card() {}
 
-    public Card(CardValue cardValue, Suit suit) {
-        this.cardValue = cardValue;
+    public Card(CardValue value, Suit suit) {
+        this.value = value;
         this.suit = suit;
     }
 
-    public CardValue getCardValue() {
-        return cardValue;
+    public CardValue getValue() {
+        return value;
     }
 
-    public void setCardValue(CardValue cardValue) {
-        this.cardValue = cardValue;
+    public void setValue(CardValue value) {
+        this.value = value;
     }
 
     public Suit getSuit() {

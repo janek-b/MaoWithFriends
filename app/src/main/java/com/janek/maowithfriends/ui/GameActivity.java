@@ -102,7 +102,6 @@ public class GameActivity extends AppCompatActivity {
         updateDiscardCard(currentGame.topDiscardCard());
         cardsLeft.setText(String.format("Cards Left: %d", currentGame.getDeck().size()));
         cardsDiscarded.setText(String.format("Cards discarded: %d", currentGame.getDiscard().size()));
-
     }
 
     @OnClick(R.id.nextTurnBtn)
@@ -140,6 +139,6 @@ public class GameActivity extends AppCompatActivity {
 
     private void updateDiscardCard(Card discardCard) {
         discardCardSuit.setText(discardCard.getSuit().toString());
-        discardCardValue.setText(discardCard.getCardValue().toString());
+        discardCardValue.setText(discardCard.getValue().toString());
     }
 }
