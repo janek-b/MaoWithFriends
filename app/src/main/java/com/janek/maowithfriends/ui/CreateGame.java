@@ -2,6 +2,7 @@ package com.janek.maowithfriends.ui;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.widget.ArrayAdapter;
@@ -18,21 +19,38 @@ import com.google.firebase.database.ValueEventListener;
 import com.jakewharton.rxbinding2.widget.RxAutoCompleteTextView;
 import com.janek.maowithfriends.Constants;
 import com.janek.maowithfriends.R;
+import com.janek.maowithfriends.adapter.NewGamePlayerListAdapter;
+import com.janek.maowithfriends.adapter.PlayerSearchAdapter;
 import com.janek.maowithfriends.model.User;
+
+import org.reactivestreams.Subscriber;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
+import io.reactivex.Observable;
+import io.reactivex.SingleObserver;
+import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.subjects.ReplaySubject;
 
 public class CreateGame extends AppCompatActivity {
     @BindView(R.id.playerSearchAutoText) AutoCompleteTextView playerSearchAutoText;
     @BindView(R.id.startGameBtn) Button startGameBtn;
     @BindView(R.id.playerListRecyclerView) RecyclerView playerListRecyclerView;
 
-    DatabaseReference rootRef;
-    FirebaseAuth mAuth;
+    private NewGamePlayerListAdapter playerListAdapter;
+    private ReplaySubject<User> players = ReplaySubject.create();
 
-    CompositeDisposable disposable = new CompositeDisposable();
+    private DatabaseReference rootRef;
+    private FirebaseAuth mAuth;
+
+    private CompositeDisposable disposable = new CompositeDisposable();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,29 +62,40 @@ public class CreateGame extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
 
-        ArrayAdapter<User> playerSearchAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
+        playerListAdapter = new NewGamePlayerListAdapter();
+        playerListRecyclerView.setAdapter(playerListAdapter);
+        playerListRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        playerListRecyclerView.setHasFixedSize(true);
 
+        PlayerSearchAdapter playerSearchAdapter = new PlayerSearchAdapter(this, android.R.layout.simple_list_item_1);
         DatabaseReference users = rootRef.child(Constants.FIREBASE_USER_REF);
         users.addValueEventListener(new ValueEventListener() {
             @Override public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
-                    User user = userSnapshot.getValue(User.class);
-                    if (user.getUserId() != currentUser.getUid()) {
+//                    User user = userSnapshot.getValue(User.class);
+                    User user = User.create(userSnapshot);
+                    if (!user.userId().equals(currentUser.getUid())) {
                         playerSearchAdapter.add(user);
-                        // TODO: don't add if already in recycler view
                     }
                 }
             }
-
             @Override public void onCancelled(DatabaseError databaseError) {
             }
         });
 
         playerSearchAutoText.setAdapter(playerSearchAdapter);
-
         disposable.add(RxAutoCompleteTextView.itemClickEvents(playerSearchAutoText).subscribe(view -> {
-            Log.d("test", playerSearchAdapter.getItem(view.position()).getUserId());
+            User selectedUser = playerSearchAdapter.getItem(view.position());
+            players.onNext(selectedUser);
+            playerSearchAdapter.removeSelectedPlayer(selectedUser);
+            playerListAdapter.updatePlayers(players.getValues(new User[]{}));
+            playerSearchAutoText.setText("");
         }));
+
+        disposable.add(players.scan(new ArrayList<User>(), (list, user) -> {
+            list.add(user);
+            return list;
+        }).subscribe(playerList -> startGameBtn.setEnabled(playerList.size() > 1)));
 
     }
 
@@ -74,5 +103,11 @@ public class CreateGame extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         disposable.clear();
+    }
+
+    @OnClick(R.id.startGameBtn)
+    public void startGame() {
+        User[] playerToInvite = players.getValues(new User[]{});
+        
     }
 }

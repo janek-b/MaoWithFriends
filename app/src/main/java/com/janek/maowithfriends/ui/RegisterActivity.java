@@ -34,9 +34,9 @@ public class RegisterActivity extends AppCompatActivity {
     @BindView(R.id.confirmRegisterEditText) EditText confirmRegisterEditText;
     @BindView(R.id.registerBtn) Button registerBtn;
 
-    ProgressDialog loading;
-    CompositeDisposable disposable = new CompositeDisposable();
-    FirebaseAuth mAuth;
+    private ProgressDialog loading;
+    private CompositeDisposable disposable = new CompositeDisposable();
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,10 +125,11 @@ public class RegisterActivity extends AppCompatActivity {
 
         user.updateProfile(profileUpdate).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                User newUser = new User(user.getUid(), user.getDisplayName(), Constants.DEFAULT_USER_IMG);
+                User newUser = User.create(user.getUid(), user.getDisplayName(), Constants.DEFAULT_USER_IMG);
+//                User newUser = new User(user.getUid(), user.getDisplayName(), Constants.DEFAULT_USER_IMG);
                 DatabaseReference newUserRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_USER_REF).child(user.getUid());
 
-                newUserRef.setValue(newUser).addOnCompleteListener(saveTask -> {
+                newUserRef.setValue(newUser.toFirebaseValue()).addOnCompleteListener(saveTask -> {
                     if (saveTask.isSuccessful()) {
                         loading.dismiss();
                         Intent intent = new Intent(RegisterActivity.this, MainActivity.class);

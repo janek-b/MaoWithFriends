@@ -24,10 +24,10 @@ public class LoginActivity extends AppCompatActivity {
     @BindView(R.id.passwordLoginEditText) EditText passwordLoginEditText;
     @BindView(R.id.loginBtn) Button loginBtn;
 
-    ProgressDialog loading;
-    CompositeDisposable disposable = new CompositeDisposable();
-    FirebaseAuth mAuth;
-    FirebaseAuth.AuthStateListener mAuthListener;
+    private ProgressDialog loading;
+    private CompositeDisposable disposable = new CompositeDisposable();
+    private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
