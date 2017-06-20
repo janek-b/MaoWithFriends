@@ -15,24 +15,18 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.janek.maowithfriends.Constants;
 import com.janek.maowithfriends.R;
-import com.janek.maowithfriends.adapter.PlayerHandAdapter;
+import com.janek.maowithfriends.adapter.FirebasePlayerHandAdapter;
 import com.janek.maowithfriends.model.Card;
 import com.janek.maowithfriends.model.Game;
 
 import org.parceler.Parcels;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 public class GameActivity extends AppCompatActivity {
     @BindView(R.id.currentTurnPlayer) TextView currentTurnPlayer;
@@ -41,11 +35,12 @@ public class GameActivity extends AppCompatActivity {
     @BindView(R.id.discardCardSuit) TextView discardCardSuit;
     @BindView(R.id.discardCardValue) TextView discardCardValue;
 
-    PlayerHandAdapter playerHandAdapter;
+    private FirebasePlayerHandAdapter firebasePlayerHandAdapter;
 
-    FirebaseAuth mAuth;
-    FirebaseUser currentUser;
-    DatabaseReference rootRef;
+    private FirebaseAuth mAuth;
+    private FirebaseUser currentUser;
+    private DatabaseReference rootRef;
+    private Game currentGame;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,9 +52,10 @@ public class GameActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
         rootRef = FirebaseDatabase.getInstance().getReference();
+        Query playerHandRef = rootRef.child(String.format(Constants.FIREBASE_PLAYER_HAND_REF, newGame.getGameId(), currentUser.getUid()));
 
-        playerHandAdapter = new PlayerHandAdapter(newGame.getPlayers().get(currentUser.getUid()).getHand());
-        playerHandRecyclerView.setAdapter(playerHandAdapter);
+        firebasePlayerHandAdapter = new FirebasePlayerHandAdapter(playerHandRef, this);
+        playerHandRecyclerView.setAdapter(firebasePlayerHandAdapter);
         playerHandRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         playerHandRecyclerView.setHasFixedSize(true);
 
@@ -70,41 +66,36 @@ public class GameActivity extends AppCompatActivity {
                 Game game = dataSnapshot.getValue(Game.class);
                 setGameState(game);
             }
-
-            @Override public void onCancelled(DatabaseError databaseError) {
-            }
+            @Override public void onCancelled(DatabaseError databaseError) {}
         });
+    }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        firebasePlayerHandAdapter.cleanup();
+    }
+
+    public void playCard(int index) {
+        if (currentGame.getCurrentPlayer().equals(currentUser.getUid())) {
+            currentGame.playCard(currentUser.getUid(), index);
+        } else {
+            Toast.makeText(this, "It is not your turn", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void setGameState(Game game) {
-        currentTurnPlayer.setText(game.currentTurnPlayer().getName());
-        updateDiscardCard(game.topDiscardCard());
-
-        playerHandAdapter.notifyDataSetChanged();
+        currentGame = game;
+        currentTurnPlayer.setText(currentGame.currentTurnPlayer().getName());
+        updateDiscardCard(currentGame.topDiscardCard());
 
         nextTurnBtn.setOnClickListener(view -> {
-            if (game.getCurrentPlayer().equals(currentUser.getUid())) {
-                game.playCard(currentUser.getUid(), 0);
-            } else {
-                game.nextTurn();
-            }
-//            updateFirebase(game);
+            currentGame.nextTurn();
         });
     }
 
     private void updateDiscardCard(Card discardCard) {
         discardCardSuit.setText(discardCard.getSuit().toString());
         discardCardValue.setText(discardCard.getCardValue().toString());
-    }
-
-    private void updateFirebase(Game game) {
-        rootRef.child(Constants.FIREBASE_GAME_REF).child(game.getGameId()).setValue(game).addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                Toast.makeText(this, "Your turn is over", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "An error occurred", Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 }
