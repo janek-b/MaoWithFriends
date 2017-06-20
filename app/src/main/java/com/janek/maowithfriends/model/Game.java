@@ -6,6 +6,7 @@ public class Game {
     String gameId;
     String currentPlayer;
     List<User> players;
+    Deck deck;
 
     public Game() {}
 
@@ -13,6 +14,7 @@ public class Game {
         this.gameId = gameId;
         this.currentPlayer = currentPlayer;
         this.players = players;
+        this.deck = Deck.createNewDeck();
     }
 
     public String getGameId() {
@@ -25,5 +27,9 @@ public class Game {
 
     public List<User> getPlayers() {
         return players;
+    }
+
+    public Deck getDeck() {
+        return deck;
     }
 }

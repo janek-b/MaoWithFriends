@@ -130,7 +130,7 @@ public class CreateGame extends AppCompatActivity {
 
         rootRef.updateChildren(updates).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                Log.d("test", "game created");
+                Log.d("test", newGame.getDeck().toString());
             } else {
                 Toast.makeText(this, "Something went wrong, please try again.", Toast.LENGTH_SHORT).show();
             }
