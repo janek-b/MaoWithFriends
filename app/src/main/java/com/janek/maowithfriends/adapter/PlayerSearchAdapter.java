@@ -42,7 +42,7 @@ public class PlayerSearchAdapter extends ArrayAdapter<User> {
         }
         User player = getItem(position);
         TextView textView = (TextView) super.getView(position, convertView, parent);
-        textView.setText(player.name());
+        textView.setText(player.getName());
         convertView.setTag(player);
         return convertView;
     }
@@ -69,7 +69,7 @@ public class PlayerSearchAdapter extends ArrayAdapter<User> {
 
         @Override
         public CharSequence convertResultToString(Object resultValue) {
-            return ((User) resultValue).name();
+            return ((User) resultValue).getName();
         }
 
         @Override
@@ -77,7 +77,7 @@ public class PlayerSearchAdapter extends ArrayAdapter<User> {
             if (constraint != null) {
                 List<User> suggestions = new ArrayList<>();
                 for (User user : prefilteredUsers) {
-                    if (user.name().toLowerCase().startsWith(constraint.toString().toLowerCase())) {
+                    if (user.getName().toLowerCase().startsWith(constraint.toString().toLowerCase())) {
                         suggestions.add(user);
                     }
                 }

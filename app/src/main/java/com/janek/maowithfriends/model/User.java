@@ -1,71 +1,52 @@
 package com.janek.maowithfriends.model;
 
-import android.os.Parcelable;
+import java.util.HashMap;
+import java.util.Map;
 
-import com.google.auto.value.AutoValue;
-import com.google.firebase.database.DataSnapshot;
+public class User {
+    String userId;
+    String name;
+    String imageUrl;
+    Map<String, Boolean> games = new HashMap<>();
 
-import me.mattlogan.auto.value.firebase.annotation.FirebaseValue;
+    public User() {}
 
-@AutoValue @FirebaseValue
-public abstract class User implements Parcelable {
-    public abstract String userId();
-    public abstract String name();
-    public abstract String imageUrl();
-
-    public static User create(String userId, String name, String imageUrl) {
-        return new AutoValue_User(userId, name, imageUrl);
+    public User(String userId, String name, String imageUrl) {
+        this.userId = userId;
+        this.name = name;
+        this.imageUrl = imageUrl;
     }
 
-    public static User create(DataSnapshot dataSnapshot) {
-        return dataSnapshot.getValue(AutoValue_User.FirebaseValue.class).toAutoValue();
+    public String getUserId() {
+        return userId;
     }
 
-    public Object toFirebaseValue() {
-        return new AutoValue_User.FirebaseValue(this);
+    public String getName() {
+        return name;
     }
 
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public Map<String, Boolean> getGames() {
+        return games;
+    }
+
+    @Override
+    public String toString() {
+        return this.name;
+    }
+
+    @Override
+    public boolean equals(Object otherUser) {
+        if (!(otherUser instanceof User)) {
+            return false;
+        } else {
+            User newUser = (User) otherUser;
+            return this.getUserId().equals(newUser.getUserId()) &&
+                    this.getName().equals(newUser.getName()) &&
+                    this.getImageUrl().equals(newUser.getImageUrl());
+        }
+    }
 }
-
-//public class User {
-//    String userId;
-//    String name;
-//    String imageUrl;
-//
-//    public User() {}
-//
-//    public User(String userId, String name, String imageUrl) {
-//        this.userId = userId;
-//        this.name = name;
-//        this.imageUrl = imageUrl;
-//    }
-//
-//    public String getUserId() {
-//        return userId;
-//    }
-//
-//    public String getName() {
-//        return name;
-//    }
-//
-//    public String getImageUrl() {
-//        return imageUrl;
-//    }
-//
-//    @Override
-//    public String toString() {
-//        return this.name;
-//    }
-//
-//    @Override
-//    public boolean equals(Object otherUser) {
-//        if (!(otherUser instanceof User)) {
-//            return false;
-//        } else {
-//            User newUser = (User) otherUser;
-//            return this.getUserId().equals(newUser.getUserId()) &&
-//                    this.getName().equals(newUser.getName()) &&
-//                    this.getImageUrl().equals(newUser.getImageUrl());
-//        }
-//    }
-//}

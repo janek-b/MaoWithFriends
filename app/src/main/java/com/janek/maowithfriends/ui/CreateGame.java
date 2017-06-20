@@ -8,6 +8,7 @@ import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -21,12 +22,16 @@ import com.janek.maowithfriends.Constants;
 import com.janek.maowithfriends.R;
 import com.janek.maowithfriends.adapter.NewGamePlayerListAdapter;
 import com.janek.maowithfriends.adapter.PlayerSearchAdapter;
+import com.janek.maowithfriends.model.Game;
 import com.janek.maowithfriends.model.User;
 
 import org.reactivestreams.Subscriber;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -49,6 +54,8 @@ public class CreateGame extends AppCompatActivity {
 
     private DatabaseReference rootRef;
     private FirebaseAuth mAuth;
+    private FirebaseUser currentUser;
+    private User userObject;
 
     private CompositeDisposable disposable = new CompositeDisposable();
 
@@ -60,7 +67,7 @@ public class CreateGame extends AppCompatActivity {
 
         rootRef = FirebaseDatabase.getInstance().getReference();
         mAuth = FirebaseAuth.getInstance();
-        FirebaseUser currentUser = mAuth.getCurrentUser();
+        currentUser = mAuth.getCurrentUser();
 
         playerListAdapter = new NewGamePlayerListAdapter();
         playerListRecyclerView.setAdapter(playerListAdapter);
@@ -72,9 +79,11 @@ public class CreateGame extends AppCompatActivity {
         users.addValueEventListener(new ValueEventListener() {
             @Override public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
-//                    User user = userSnapshot.getValue(User.class);
-                    User user = User.create(userSnapshot);
-                    if (!user.userId().equals(currentUser.getUid())) {
+                    User user = userSnapshot.getValue(User.class);
+//                    User user = User.create(userSnapshot);
+                    if (user.getUserId().equals(currentUser.getUid())) {
+                        userObject = user;
+                    } else {
                         playerSearchAdapter.add(user);
                     }
                 }
@@ -107,7 +116,24 @@ public class CreateGame extends AppCompatActivity {
 
     @OnClick(R.id.startGameBtn)
     public void startGame() {
-        User[] playerToInvite = players.getValues(new User[]{});
-        
+        List<User> playersToInvite = new ArrayList<>();
+        playersToInvite.addAll(Arrays.asList(players.getValues(new User[]{})));
+        playersToInvite.add(userObject);
+        String gameKey = rootRef.child(Constants.FIREBASE_GAME_REF).push().getKey();
+        Game newGame = new Game(gameKey, currentUser.getUid(), playersToInvite);
+
+        Map updates = new HashMap();
+        updates.put(String.format("%s/%s", Constants.FIREBASE_GAME_REF, gameKey), newGame);
+        for (User player : playersToInvite) {
+            updates.put(String.format(Constants.FIREBASE_USER_GAME_REF, player.getUserId(), gameKey), true);
+        }
+
+        rootRef.updateChildren(updates).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Log.d("test", "game created");
+            } else {
+                Toast.makeText(this, "Something went wrong, please try again.", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

@@ -125,11 +125,11 @@ public class RegisterActivity extends AppCompatActivity {
 
         user.updateProfile(profileUpdate).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                User newUser = User.create(user.getUid(), user.getDisplayName(), Constants.DEFAULT_USER_IMG);
-//                User newUser = new User(user.getUid(), user.getDisplayName(), Constants.DEFAULT_USER_IMG);
+//                User newUser = User.create(user.getUid(), user.getDisplayName(), Constants.DEFAULT_USER_IMG);
+                User newUser = new User(user.getUid(), user.getDisplayName(), Constants.DEFAULT_USER_IMG);
                 DatabaseReference newUserRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_USER_REF).child(user.getUid());
 
-                newUserRef.setValue(newUser.toFirebaseValue()).addOnCompleteListener(saveTask -> {
+                newUserRef.setValue(newUser).addOnCompleteListener(saveTask -> {
                     if (saveTask.isSuccessful()) {
                         loading.dismiss();
                         Intent intent = new Intent(RegisterActivity.this, MainActivity.class);

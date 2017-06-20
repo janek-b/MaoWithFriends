@@ -62,8 +62,8 @@ public class NewGamePlayerListAdapter extends RecyclerView.Adapter<NewGamePlayer
         }
 
         public void bindPlayer(User player) {
-            playerNameTextView.setText(player.name());
-            Picasso.with(mContext).load(player.imageUrl()).into(playerProfileImg);
+            playerNameTextView.setText(player.getName());
+            Picasso.with(mContext).load(player.getImageUrl()).into(playerProfileImg);
         }
     }
 }
