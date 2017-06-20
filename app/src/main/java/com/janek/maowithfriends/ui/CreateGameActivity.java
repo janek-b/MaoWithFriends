@@ -123,7 +123,8 @@ public class CreateGameActivity extends AppCompatActivity {
             updates.put(String.format(Constants.FIREBASE_USER_GAME_REF, player.getUserId(), gameKey), true);
             newGame.addPlayer(new Player(player.getUserId(), player.getName(), player.getImageUrl()));
         }
-        newGame.dealCards();
+//        newGame.dealCards();
+        newGame.startGame();
         updates.put(String.format("%s/%s", Constants.FIREBASE_GAME_REF, gameKey), newGame);
 
 

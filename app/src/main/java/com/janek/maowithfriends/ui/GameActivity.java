@@ -7,6 +7,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -76,11 +77,19 @@ public class GameActivity extends AppCompatActivity {
     private void setGameState(Game game) {
         currentTurnPlayer.setText(game.getPlayers().get(game.getCurrentPlayer()).getName());
 
-
         nextTurnBtn.setOnClickListener(view -> {
             game.nextTurn();
-            rootRef.child(Constants.FIREBASE_GAME_REF).child(game.getGameId()).setValue(game);
+            updateFirebase(game);
         });
+    }
 
+    private void updateFirebase(Game game) {
+        rootRef.child(Constants.FIREBASE_GAME_REF).child(game.getGameId()).setValue(game).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Toast.makeText(this, "Your turn is over", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "An error occurred", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }
