@@ -178,4 +178,13 @@ public class Game {
         return false;
     }
 
+    public boolean gameOver() {
+        for (Player player : getPlayers().values()) {
+            if (player.getHand().size() == 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

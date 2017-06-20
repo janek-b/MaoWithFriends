@@ -1,5 +1,7 @@
 package com.janek.maowithfriends.ui;
 
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -102,6 +104,7 @@ public class GameActivity extends AppCompatActivity {
         updateDiscardCard(currentGame.topDiscardCard());
         cardsLeft.setText(String.format("Cards Left: %d", currentGame.getDeck().size()));
         cardsDiscarded.setText(String.format("Cards discarded: %d", currentGame.getDiscard().size()));
+        checkEndGame();
     }
 
     @OnClick(R.id.nextTurnBtn)
@@ -140,5 +143,15 @@ public class GameActivity extends AppCompatActivity {
     private void updateDiscardCard(Card discardCard) {
         discardCardSuit.setText(discardCard.getSuit().toString());
         discardCardValue.setText(discardCard.getValue().toString());
+    }
+
+    private void checkEndGame() {
+        if (currentGame.gameOver()) {
+            FragmentManager fm = getSupportFragmentManager();
+            GameOverDialogFragment gameOverDialogFragment = new GameOverDialogFragment();
+            boolean outcome = (currentGame.getPlayers().get(uid).getHand().size() == 0);
+            gameOverDialogFragment.setOutcome(outcome);
+            gameOverDialogFragment.show(fm, "Game Over Fragment");
+        }
     }
 }
