@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick(R.id.newGameBtn)
     public void newGame() {
-        Intent intent = new Intent(MainActivity.this, CreateGame.class);
+        Intent intent = new Intent(MainActivity.this, CreateGameActivity.class);
         startActivity(intent);
     }
 }

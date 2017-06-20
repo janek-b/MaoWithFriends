@@ -20,7 +20,9 @@
         </activity>
         <activity android:name=".ui.RegisterActivity">
         </activity>
-        <activity android:name=".ui.CreateGame">
+        <activity android:name=".ui.CreateGameActivity">
+        </activity>
+        <activity android:name=".ui.GameActivity">
         </activity>
     </application>
 

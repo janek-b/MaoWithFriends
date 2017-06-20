@@ -1,10 +1,12 @@
 package com.janek.maowithfriends.model;
 
+import org.parceler.Parcel;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@Parcel
 public class Deck {
     List<Card> deck = new ArrayList<>();
 

@@ -1,8 +1,11 @@
 package com.janek.maowithfriends.model;
 
+import org.parceler.Parcel;
+
 import java.util.HashMap;
 import java.util.Map;
 
+@Parcel
 public class User {
     String userId;
     String name;

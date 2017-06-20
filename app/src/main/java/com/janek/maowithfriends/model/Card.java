@@ -1,5 +1,8 @@
 package com.janek.maowithfriends.model;
 
+import org.parceler.Parcel;
+
+@Parcel
 public class Card {
     CardValue cardValue;
     Suit suit;

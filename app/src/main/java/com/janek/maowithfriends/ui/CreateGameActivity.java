@@ -1,11 +1,10 @@
 package com.janek.maowithfriends.ui;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.Toast;
@@ -23,9 +22,10 @@ import com.janek.maowithfriends.R;
 import com.janek.maowithfriends.adapter.NewGamePlayerListAdapter;
 import com.janek.maowithfriends.adapter.PlayerSearchAdapter;
 import com.janek.maowithfriends.model.Game;
+import com.janek.maowithfriends.model.Player;
 import com.janek.maowithfriends.model.User;
 
-import org.reactivestreams.Subscriber;
+import org.parceler.Parcels;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,15 +36,10 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.reactivex.Observable;
-import io.reactivex.SingleObserver;
-import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
 import io.reactivex.subjects.ReplaySubject;
 
-public class CreateGame extends AppCompatActivity {
+public class CreateGameActivity extends AppCompatActivity {
     @BindView(R.id.playerSearchAutoText) AutoCompleteTextView playerSearchAutoText;
     @BindView(R.id.startGameBtn) Button startGameBtn;
     @BindView(R.id.playerListRecyclerView) RecyclerView playerListRecyclerView;
@@ -119,18 +114,26 @@ public class CreateGame extends AppCompatActivity {
         List<User> playersToInvite = new ArrayList<>();
         playersToInvite.addAll(Arrays.asList(players.getValues(new User[]{})));
         playersToInvite.add(userObject);
+
         String gameKey = rootRef.child(Constants.FIREBASE_GAME_REF).push().getKey();
-        Game newGame = new Game(gameKey, currentUser.getUid(), playersToInvite);
+        Game newGame = new Game(gameKey, currentUser.getUid());
 
         Map updates = new HashMap();
-        updates.put(String.format("%s/%s", Constants.FIREBASE_GAME_REF, gameKey), newGame);
         for (User player : playersToInvite) {
             updates.put(String.format(Constants.FIREBASE_USER_GAME_REF, player.getUserId(), gameKey), true);
+            newGame.addPlayer(new Player(player.getUserId(), player.getName(), player.getImageUrl()));
         }
+        newGame.dealCards();
+        updates.put(String.format("%s/%s", Constants.FIREBASE_GAME_REF, gameKey), newGame);
+
 
         rootRef.updateChildren(updates).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                Log.d("test", newGame.getDeck().toString());
+                Intent intent = new Intent(CreateGameActivity.this, GameActivity.class);
+                intent.putExtra("game", Parcels.wrap(newGame));
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
             } else {
                 Toast.makeText(this, "Something went wrong, please try again.", Toast.LENGTH_SHORT).show();
             }
