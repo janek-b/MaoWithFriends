@@ -37,6 +37,8 @@ public class FirebasePlayerHandAdapter extends FirebaseRecyclerAdapter<Card, Fir
         previousCont = getItemCount();
     }
 
+
+
     @Override
     protected void populateViewHolder(FirebaseCardViewHolder viewHolder, Card model, int position) {
         viewHolder.bindCard(model);

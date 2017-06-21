@@ -1,6 +1,9 @@
 package com.janek.maowithfriends.adapter;
 
+import android.animation.ArgbEvaluator;
+import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -62,12 +65,15 @@ public class PlayerTurnAdapter extends RecyclerView.Adapter<PlayerTurnAdapter.Pl
         @BindView(R.id.playerTurnIcon) CardView playerTurnIcon;
 
         private Context context;
+        private int colorPrimaryDark;
+        private int colorAccent;
 
         public PlayerTurnViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
             context = itemView.getContext();
-
+            colorPrimaryDark = ContextCompat.getColor(context, R.color.colorPrimaryDark);
+            colorAccent = ContextCompat.getColor(context, R.color.colorAccent);
         }
 
         public void bindPlayer(Game game, Player player, String uid) {
@@ -78,8 +84,14 @@ public class PlayerTurnAdapter extends RecyclerView.Adapter<PlayerTurnAdapter.Pl
                 playerNameTextView.setText(StringUtils.toTitleCase(player.getName()));
             }
             if (player.getUserId().equals(game.getCurrentPlayer())) {
+                ObjectAnimator animator = ObjectAnimator.ofInt(playerTurnIcon, "cardBackgroundColor", colorPrimaryDark, colorAccent).setDuration(500);
+                animator.setEvaluator(new ArgbEvaluator());
+                animator.start();
                 playerTurnIcon.animate().scaleX(1.3f).scaleY(1.3f).alpha(0.7f).setDuration(500);
             } else {
+                ObjectAnimator animator = ObjectAnimator.ofInt(playerTurnIcon, "cardBackgroundColor", colorAccent, colorPrimaryDark).setDuration(500);
+                animator.setEvaluator(new ArgbEvaluator());
+                animator.start();
                 playerTurnIcon.animate().scaleX(1f).scaleY(1f).alpha(1f);
             }
         }
