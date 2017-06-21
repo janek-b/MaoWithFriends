@@ -27,7 +27,8 @@ public class GameOverDialogFragment extends DialogFragment {
         builder.setMessage("Play another Round?");
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override public void onClick(DialogInterface dialog, int which) {
-                dismiss();
+                ((GameActivity)getActivity()).newRound();
+//                dismiss();
                 // TODO: add new game method;
             }
         });
