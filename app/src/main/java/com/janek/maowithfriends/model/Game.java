@@ -83,8 +83,7 @@ public class Game {
     private void processCard(Card card) {
         this.discard.add(card);
         if (card.getValue().getCardValue() == 14) {
-            nextTurn();
-            nextTurn();
+            skipTurn();
         } else if (card.getValue().getCardValue() == 7) {
             this.penalty++;
             nextTurn();
@@ -108,6 +107,12 @@ public class Game {
     }
 
     public void nextTurn() {
+        this.currentPlayer = this.nextPlayerTurn.get(this.currentPlayer);
+        updateGameState();
+    }
+
+    private void skipTurn() {
+        this.currentPlayer = this.nextPlayerTurn.get(this.currentPlayer);
         this.currentPlayer = this.nextPlayerTurn.get(this.currentPlayer);
         updateGameState();
     }
