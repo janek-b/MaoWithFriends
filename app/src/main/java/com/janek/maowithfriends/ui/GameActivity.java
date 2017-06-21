@@ -76,6 +76,8 @@ public class GameActivity extends AppCompatActivity {
         mAuthListener = this::authListen;
         rootRef = FirebaseDatabase.getInstance().getReference();
 
+        fm = getSupportFragmentManager();
+        gameOverDialogFragment = new GameOverDialogFragment();
     }
 
     @Override
@@ -107,11 +109,6 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void setUpGameState() {
-        fm = getSupportFragmentManager();
-        gameOverDialogFragment = new GameOverDialogFragment();
-        boolean outcome = (currentGame.getPlayers().get(uid).getHand().size() == 0);
-        gameOverDialogFragment.setOutcome(outcome);
-
         setUpAdapters();
 
         rootRef.child(Constants.FIREBASE_GAMES_REF).child(currentGame.getGameId()).addValueEventListener(new ValueEventListener() {
@@ -170,8 +167,6 @@ public class GameActivity extends AppCompatActivity {
 
     private void checkRoundOver() {
         if (currentGame.roundOver()) {
-//            FragmentManager fm = getSupportFragmentManager();
-//            GameOverDialogFragment gameOverDialogFragment = new GameOverDialogFragment();
             boolean outcome = (currentGame.getPlayers().get(uid).getHand().size() == 0);
             gameOverDialogFragment.setOutcome(outcome);
             gameOverDialogFragment.show(fm, "Game Over Fragment");
