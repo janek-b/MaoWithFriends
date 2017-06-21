@@ -7,6 +7,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,6 +26,7 @@ import com.janek.maowithfriends.adapter.FirebasePlayerHandAdapter;
 import com.janek.maowithfriends.adapter.PlayerTurnAdapter;
 import com.janek.maowithfriends.model.Card;
 import com.janek.maowithfriends.model.Game;
+import com.squareup.picasso.Picasso;
 
 import org.parceler.Parcels;
 
@@ -36,12 +38,12 @@ import io.reactivex.subjects.BehaviorSubject;
 
 public class GameActivity extends AppCompatActivity {
     @BindView(R.id.playerHandRecycleView) RecyclerView playerHandRecyclerView;
+    @BindView(R.id.playersLayout) RecyclerView playersLayout;
     @BindView(R.id.nextTurnBtn) Button nextTurnBtn;
-    @BindView(R.id.discardCardSuit) TextView discardCardSuit;
-    @BindView(R.id.discardCardValue) TextView discardCardValue;
     @BindView(R.id.cardsLeft) TextView cardsLeft;
     @BindView(R.id.cardsDiscarded) TextView cardsDiscarded;
-    @BindView(R.id.playersLayout) RecyclerView playersLayout;
+    @BindView(R.id.discardCardImageView) ImageView discardCardImageView;
+
 
     private FirebasePlayerHandAdapter firebasePlayerHandAdapter;
     private PlayerTurnAdapter playerTurnAdapter;
@@ -154,8 +156,8 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void updateDiscardCard(Card discardCard) {
-        discardCardSuit.setText(discardCard.getSuit().toString());
-        discardCardValue.setText(discardCard.getValue().toString());
+        int cardImageResource = getResources().getIdentifier(discardCard.cardImage(), "drawable", getPackageName());
+        Picasso.with(this).load(cardImageResource).into(discardCardImageView);
     }
 
     private void checkEndGame() {

@@ -29,4 +29,9 @@ public class Card {
     public void setSuit(Suit suit) {
         this.suit = suit;
     }
+
+    public String cardImage() {
+        String cardImg = String.format("%s_of_%s", getValue().toString().toLowerCase(), getSuit().toString().toLowerCase());
+        return cardImg;
+    }
 }
