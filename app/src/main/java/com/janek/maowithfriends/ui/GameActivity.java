@@ -26,6 +26,7 @@ import com.janek.maowithfriends.adapter.FirebasePlayerHandAdapter;
 import com.janek.maowithfriends.adapter.PlayerTurnAdapter;
 import com.janek.maowithfriends.model.Card;
 import com.janek.maowithfriends.model.Game;
+import com.janek.maowithfriends.util.StringUtils;
 import com.squareup.picasso.Picasso;
 
 import org.parceler.Parcels;
@@ -49,6 +50,7 @@ public class GameActivity extends AppCompatActivity {
     private PlayerTurnAdapter playerTurnAdapter;
 
     private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseUser currentUser;
     private String uid;
     private DatabaseReference rootRef;
@@ -66,10 +68,39 @@ public class GameActivity extends AppCompatActivity {
         currentGame = Parcels.unwrap(getIntent().getParcelableExtra("game"));
 
         mAuth = FirebaseAuth.getInstance();
-        currentUser = mAuth.getCurrentUser();
-        uid = currentUser.getUid();
+        mAuthListener = this::authListen;
         rootRef = FirebaseDatabase.getInstance().getReference();
+    }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        firebasePlayerHandAdapter.cleanup();
+        disposable.clear();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mAuthListener != null) mAuth.removeAuthStateListener(mAuthListener);
+    }
+
+    public void authListen(FirebaseAuth firebaseAuth) {
+        currentUser = firebaseAuth.getCurrentUser();
+        if (currentUser != null) {
+            uid = currentUser.getUid();
+            getSupportActionBar().setTitle(StringUtils.toTitleCase(currentUser.getDisplayName()));
+            setUpGameState();
+        }
+    }
+
+    private void setUpGameState() {
         setUpAdapters();
 
         rootRef.child(Constants.FIREBASE_GAME_REF).child(currentGame.getGameId()).addValueEventListener(new ValueEventListener() {
@@ -101,13 +132,6 @@ public class GameActivity extends AppCompatActivity {
         playerHandRecyclerView.setHasFixedSize(true);
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        firebasePlayerHandAdapter.cleanup();
-        disposable.clear();
-    }
-
     private void setGameState() {
         updateDiscardCard(currentGame.topDiscardCard());
         cardsLeft.setText(String.format("Cards Left: %d", currentGame.getDeck().size()));
@@ -115,18 +139,18 @@ public class GameActivity extends AppCompatActivity {
         checkEndGame();
     }
 
-    public void playCard(int index) {
-        if (checkPlayerTurn()) {
-            if (currentGame.validCardInHand(uid)) {
-                Card playedCard = currentGame.currentTurnPlayer().getHand().get(index);
-                if (currentGame.validCard(playedCard)) {
-                    currentGame.playCard(uid, index);
-                } else {
-                    Toast.makeText(this, "Card must be of the same suit or value", Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                Toast.makeText(this, "You have no valid cards in hand, draw a new card", Toast.LENGTH_SHORT).show();
-            }
+    private void updateDiscardCard(Card discardCard) {
+        int cardImageResource = getResources().getIdentifier(discardCard.cardImage(), "drawable", getPackageName());
+        Picasso.with(this).load(cardImageResource).into(discardCardImageView);
+    }
+
+    private void checkEndGame() {
+        if (currentGame.gameOver()) {
+            FragmentManager fm = getSupportFragmentManager();
+            GameOverDialogFragment gameOverDialogFragment = new GameOverDialogFragment();
+            boolean outcome = (currentGame.getPlayers().get(uid).getHand().size() == 0);
+            gameOverDialogFragment.setOutcome(outcome);
+            gameOverDialogFragment.show(fm, "Game Over Fragment");
         }
     }
 
@@ -146,6 +170,21 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
+    public void playCard(int index) {
+        if (checkPlayerTurn()) {
+            if (currentGame.validCardInHand(uid)) {
+                Card playedCard = currentGame.currentTurnPlayer().getHand().get(index);
+                if (currentGame.validCard(playedCard)) {
+                    currentGame.playCard(uid, index);
+                } else {
+                    Toast.makeText(this, "Card must be of the same suit or value", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(this, "You have no valid cards in hand, draw a new card", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
     private boolean checkPlayerTurn() {
         if (currentGame.getCurrentPlayer().equals(uid)) {
             return true;
@@ -155,18 +194,4 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
-    private void updateDiscardCard(Card discardCard) {
-        int cardImageResource = getResources().getIdentifier(discardCard.cardImage(), "drawable", getPackageName());
-        Picasso.with(this).load(cardImageResource).into(discardCardImageView);
-    }
-
-    private void checkEndGame() {
-        if (currentGame.gameOver()) {
-            FragmentManager fm = getSupportFragmentManager();
-            GameOverDialogFragment gameOverDialogFragment = new GameOverDialogFragment();
-            boolean outcome = (currentGame.getPlayers().get(uid).getHand().size() == 0);
-            gameOverDialogFragment.setOutcome(outcome);
-            gameOverDialogFragment.show(fm, "Game Over Fragment");
-        }
-    }
 }

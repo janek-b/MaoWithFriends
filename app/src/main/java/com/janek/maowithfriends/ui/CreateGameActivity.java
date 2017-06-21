@@ -24,6 +24,7 @@ import com.janek.maowithfriends.adapter.PlayerSearchAdapter;
 import com.janek.maowithfriends.model.Game;
 import com.janek.maowithfriends.model.Player;
 import com.janek.maowithfriends.model.User;
+import com.janek.maowithfriends.util.StringUtils;
 
 import org.parceler.Parcels;
 
@@ -49,6 +50,7 @@ public class CreateGameActivity extends AppCompatActivity {
 
     private DatabaseReference rootRef;
     private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseUser currentUser;
     private User userObject;
 
@@ -62,8 +64,36 @@ public class CreateGameActivity extends AppCompatActivity {
 
         rootRef = FirebaseDatabase.getInstance().getReference();
         mAuth = FirebaseAuth.getInstance();
-        currentUser = mAuth.getCurrentUser();
+        mAuthListener = this::authListen;
+    }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        disposable.clear();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mAuthListener != null) mAuth.removeAuthStateListener(mAuthListener);
+    }
+
+    public void authListen(FirebaseAuth firebaseAuth) {
+        currentUser = firebaseAuth.getCurrentUser();
+        if (currentUser != null) {
+            getSupportActionBar().setTitle(StringUtils.toTitleCase(currentUser.getDisplayName()));
+            setUpPlayerSearch();
+        }
+    }
+
+    private void setUpPlayerSearch() {
         playerListAdapter = new NewGamePlayerListAdapter();
         playerListRecyclerView.setAdapter(playerListAdapter);
         playerListRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -99,13 +129,6 @@ public class CreateGameActivity extends AppCompatActivity {
             list.add(user);
             return list;
         }).subscribe(playerList -> startGameBtn.setEnabled(playerList.size() > 0)));
-
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        disposable.clear();
     }
 
     @OnClick(R.id.startGameBtn)
