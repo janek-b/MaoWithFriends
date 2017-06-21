@@ -149,7 +149,11 @@ public class GameActivity extends AppCompatActivity {
         Query playerHandRef = rootRef.child(String.format(Constants.FIREBASE_PLAYER_HAND_REF, currentGame.getGameId(), uid));
         firebasePlayerHandAdapter = new FirebasePlayerHandAdapter(playerHandRef, this);
         playerHandRecyclerView.setAdapter(firebasePlayerHandAdapter);
-        playerHandRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        linearLayoutManager.setStackFromEnd(true);
+        linearLayoutManager.setReverseLayout(true);
+        playerHandRecyclerView.setLayoutManager(linearLayoutManager);
+//        playerHandRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         playerHandRecyclerView.setHasFixedSize(true);
     }
 
