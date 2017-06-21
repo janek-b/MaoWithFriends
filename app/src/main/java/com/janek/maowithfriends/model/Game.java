@@ -113,14 +113,8 @@ public class Game {
     }
 
     public void startGame() {
-//        this.deck = Game.createNewDeck();
         this.nextPlayerTurn = Game.calculateTurns(getPlayers());
         startRound();
-//        this.gameOver = false;
-//        dealCards();
-//        if (this.discard.size() == 0) {
-//            this.discard.add(drawCard());
-//        }
     }
 
     private void startRound() {
