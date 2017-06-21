@@ -7,13 +7,11 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -32,7 +30,6 @@ import com.janek.maowithfriends.util.StringUtils;
 import com.squareup.picasso.Picasso;
 
 import org.parceler.Parcels;
-import org.reactivestreams.Subscriber;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -108,7 +105,7 @@ public class GameActivity extends AppCompatActivity {
     private void setUpGameState() {
         setUpAdapters();
 
-        rootRef.child(Constants.FIREBASE_GAME_REF).child(currentGame.getGameId()).addValueEventListener(new ValueEventListener() {
+        rootRef.child(Constants.FIREBASE_GAMES_REF).child(currentGame.getGameId()).addValueEventListener(new ValueEventListener() {
             @Override public void onDataChange(DataSnapshot dataSnapshot) {
                 Game firebaseGame = dataSnapshot.getValue(Game.class);
                 if (firebaseGame.isGameOver()) {
@@ -133,13 +130,6 @@ public class GameActivity extends AppCompatActivity {
                 quitGame();
             }
         }));
-
-//        disposable.add(gameSubject.subscribe(game -> {
-//                    currentGame = game;
-//                    playerTurnAdapter.updateGame(game);
-//                    setGameState();
-//                }
-//        ));
     }
 
     private void setUpAdapters() {

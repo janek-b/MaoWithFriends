@@ -1,7 +1,5 @@
 package com.janek.maowithfriends.model;
 
-import android.util.Log;
-
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.janek.maowithfriends.Constants;
@@ -161,11 +159,6 @@ public class Game {
         return deck.remove(0);
     }
 
-    private void updateGameState() {
-        DatabaseReference gameRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_GAME_REF).child(getGameId());
-        gameRef.setValue(this);
-    }
-
     public boolean validCard(Card card) {
         Card topCard = topDiscardCard();
         if ((this.penalty > 0) && (topCard.getValue().getCardValue() == 7)) {
@@ -199,7 +192,17 @@ public class Game {
 
     public void endGame() {
         this.setGameOver(true);
-        this.updateGameState();
+        Map updates = new HashMap();
+        updates.put(String.format(Constants.FIREBASE_GAME_REF, getGameId()), this);
+        for (Player player : getPlayers().values()) {
+            updates.put(String.format(Constants.FIREBASE_USER_GAME_REF, player.getUserId(), getGameId()), false);
+        }
+        FirebaseDatabase.getInstance().getReference().updateChildren(updates);
+    }
+
+    private void updateGameState() {
+        DatabaseReference gameRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_GAMES_REF).child(getGameId());
+        gameRef.setValue(this);
     }
 
 }

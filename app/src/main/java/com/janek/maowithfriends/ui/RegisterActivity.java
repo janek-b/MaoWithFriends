@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Patterns;
 import android.widget.Button;
 import android.widget.EditText;
@@ -126,7 +125,7 @@ public class RegisterActivity extends AppCompatActivity {
         user.updateProfile(profileUpdate).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 User newUser = new User(user.getUid(), user.getDisplayName(), Constants.DEFAULT_USER_IMG);
-                DatabaseReference newUserRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_USER_REF).child(user.getUid());
+                DatabaseReference newUserRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_USERS_REF).child(user.getUid());
 
                 newUserRef.setValue(newUser).addOnCompleteListener(saveTask -> {
                     if (saveTask.isSuccessful()) {

@@ -13,10 +13,12 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.janek.maowithfriends.Constants;
 import com.janek.maowithfriends.R;
 import com.janek.maowithfriends.adapter.FirebaseGameListViewHolder;
 import com.janek.maowithfriends.model.Game;
+import com.janek.maowithfriends.util.StringUtils;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -31,8 +33,8 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseUser currentUser;
     private DatabaseReference rootRef;
-    private DatabaseReference playerGameListRef;
-    private DatabaseReference gameRef;
+    private Query playerGameListRef;
+    private Query gameRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,9 +68,9 @@ public class MainActivity extends AppCompatActivity {
     public void authListen(FirebaseAuth firebaseAuth) {
         currentUser = firebaseAuth.getCurrentUser();
         if (currentUser != null) {
-            getSupportActionBar().setTitle("Welcome " + currentUser.getDisplayName());
-            playerGameListRef = rootRef.child(String.format(Constants.FIREBASE_USER_ALL_GAMES_REF, currentUser.getUid()));
-            gameRef = rootRef.child(Constants.FIREBASE_GAME_REF);
+            getSupportActionBar().setTitle("Welcome " + StringUtils.toTitleCase(currentUser.getDisplayName()));
+            playerGameListRef = rootRef.child(String.format(Constants.FIREBASE_USER_ALL_GAMES_REF, currentUser.getUid())).orderByValue().equalTo(true);
+            gameRef = rootRef.child(Constants.FIREBASE_GAMES_REF);
             setUpGameList();
         }
     }

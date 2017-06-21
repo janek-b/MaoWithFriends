@@ -34,7 +34,7 @@ public class GameOverDialogFragment extends DialogFragment {
         builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
             @Override public void onClick(DialogInterface dialog, int which) {
                 ((GameActivity)getActivity()).endGame();
-                dismiss();
+//                dismiss();
                 // TODO: add quit game method;
             }
         });

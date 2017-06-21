@@ -100,7 +100,7 @@ public class CreateGameActivity extends AppCompatActivity {
         playerListRecyclerView.setHasFixedSize(true);
 
         PlayerSearchAdapter playerSearchAdapter = new PlayerSearchAdapter(this, android.R.layout.simple_list_item_1);
-        DatabaseReference users = rootRef.child(Constants.FIREBASE_USER_REF);
+        DatabaseReference users = rootRef.child(Constants.FIREBASE_USERS_REF);
         users.addValueEventListener(new ValueEventListener() {
             @Override public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
@@ -137,7 +137,7 @@ public class CreateGameActivity extends AppCompatActivity {
         playersToInvite.addAll(Arrays.asList(players.getValues(new User[]{})));
         playersToInvite.add(userObject);
 
-        String gameKey = rootRef.child(Constants.FIREBASE_GAME_REF).push().getKey();
+        String gameKey = rootRef.child(Constants.FIREBASE_GAMES_REF).push().getKey();
         Game newGame = new Game(gameKey, currentUser.getUid());
 
         Map updates = new HashMap();
@@ -146,7 +146,7 @@ public class CreateGameActivity extends AppCompatActivity {
             newGame.addPlayer(new Player(player.getUserId(), player.getName(), player.getImageUrl()));
         }
         newGame.startGame();
-        updates.put(String.format("%s/%s", Constants.FIREBASE_GAME_REF, gameKey), newGame);
+        updates.put(String.format(Constants.FIREBASE_GAME_REF, gameKey), newGame);
 
 
         rootRef.updateChildren(updates).addOnCompleteListener(task -> {
