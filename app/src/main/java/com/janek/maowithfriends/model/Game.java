@@ -23,6 +23,7 @@ public class Game {
     List<Card> deck = new ArrayList<>();
     List<Card> discard = new ArrayList<>();
     int penalty = 0;
+    boolean gameOver = false;
 
     public Game() {}
 
@@ -53,6 +54,14 @@ public class Game {
 
     public int getPenalty() {
         return penalty;
+    }
+
+    public boolean isGameOver() {
+        return gameOver;
+    }
+
+    public void setGameOver(boolean gameOver) {
+        this.gameOver = gameOver;
     }
 
     public void addPlayer(Player player) {
@@ -108,6 +117,7 @@ public class Game {
     public void startGame() {
         this.deck = Game.createNewDeck();
         this.nextPlayerTurn = Game.calculateTurns(getPlayers());
+        this.gameOver = false;
         dealCards();
         if (this.discard.size() == 0) {
             this.discard.add(drawCard());
@@ -178,13 +188,18 @@ public class Game {
         return false;
     }
 
-    public boolean gameOver() {
+    public boolean roundOver() {
         for (Player player : getPlayers().values()) {
             if (player.getHand().size() == 0) {
                 return true;
             }
         }
         return false;
+    }
+
+    public void endGame() {
+        this.setGameOver(true);
+        this.updateGameState();
     }
 
 }

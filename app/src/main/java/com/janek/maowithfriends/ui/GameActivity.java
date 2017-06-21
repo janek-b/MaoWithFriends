@@ -1,11 +1,13 @@
 package com.janek.maowithfriends.ui;
 
+import android.content.Intent;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -30,11 +32,14 @@ import com.janek.maowithfriends.util.StringUtils;
 import com.squareup.picasso.Picasso;
 
 import org.parceler.Parcels;
+import org.reactivestreams.Subscriber;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableObserver;
 import io.reactivex.subjects.BehaviorSubject;
 
 public class GameActivity extends AppCompatActivity {
@@ -105,16 +110,36 @@ public class GameActivity extends AppCompatActivity {
 
         rootRef.child(Constants.FIREBASE_GAME_REF).child(currentGame.getGameId()).addValueEventListener(new ValueEventListener() {
             @Override public void onDataChange(DataSnapshot dataSnapshot) {
-                gameSubject.onNext(dataSnapshot.getValue(Game.class));
+                Game firebaseGame = dataSnapshot.getValue(Game.class);
+                if (firebaseGame.isGameOver()) {
+                    gameSubject.onComplete();
+                } else {
+                    gameSubject.onNext(dataSnapshot.getValue(Game.class));
+                }
             }
             @Override public void onCancelled(DatabaseError databaseError) {}
         });
 
-        disposable.add(gameSubject.subscribe(game -> {
-            currentGame = game;
-            playerTurnAdapter.updateGame(game);
-            setGameState();
+        disposable.add(gameSubject.subscribeWith(new DisposableObserver<Game>() {
+            @Override public void onNext(@NonNull Game game) {
+                currentGame = game;
+                playerTurnAdapter.updateGame(game);
+                setGameState();
+            }
+            @Override public void onError(@NonNull Throwable e) {
+                e.printStackTrace();
+            }
+            @Override public void onComplete() {
+                quitGame();
+            }
         }));
+
+//        disposable.add(gameSubject.subscribe(game -> {
+//                    currentGame = game;
+//                    playerTurnAdapter.updateGame(game);
+//                    setGameState();
+//                }
+//        ));
     }
 
     private void setUpAdapters() {
@@ -136,7 +161,7 @@ public class GameActivity extends AppCompatActivity {
         updateDiscardCard(currentGame.topDiscardCard());
         cardsLeft.setText(String.format("Cards Left: %d", currentGame.getDeck().size()));
         cardsDiscarded.setText(String.format("Cards discarded: %d", currentGame.getDiscard().size()));
-        checkEndGame();
+        checkRoundOver();
     }
 
     private void updateDiscardCard(Card discardCard) {
@@ -144,8 +169,8 @@ public class GameActivity extends AppCompatActivity {
         Picasso.with(this).load(cardImageResource).into(discardCardImageView);
     }
 
-    private void checkEndGame() {
-        if (currentGame.gameOver()) {
+    private void checkRoundOver() {
+        if (currentGame.roundOver()) {
             FragmentManager fm = getSupportFragmentManager();
             GameOverDialogFragment gameOverDialogFragment = new GameOverDialogFragment();
             boolean outcome = (currentGame.getPlayers().get(uid).getHand().size() == 0);
@@ -192,6 +217,16 @@ public class GameActivity extends AppCompatActivity {
             Toast.makeText(this, "It is not your turn", Toast.LENGTH_SHORT).show();
             return false;
         }
+    }
+
+    public void endGame() {
+        currentGame.endGame();
+    }
+
+    public void quitGame() {
+        Intent intent = new Intent(GameActivity.this, MainActivity.class);
+        startActivity(intent);
+        finish();
     }
 
 }
