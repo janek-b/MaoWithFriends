@@ -6,42 +6,48 @@
                                     android:layout_height="140dp"
                                     android:layout_margin="8dp"
                                     app:cardBackgroundColor="@color/colorPrimaryLight"
-                                    app:cardCornerRadius="8dp">
+                                    app:cardCornerRadius="4dp"
+                                    app:contentPadding="4dp">
 
 
-    <android.support.constraint.ConstraintLayout
+    <!--<android.support.constraint.ConstraintLayout-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="match_parent">-->
+
+    <!--<TextView-->
+    <!--android:id="@+id/cardSuit"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_marginBottom="8dp"-->
+    <!--android:layout_marginLeft="8dp"-->
+    <!--android:layout_marginRight="8dp"-->
+    <!--android:layout_marginTop="8dp"-->
+    <!--android:text="suit"-->
+    <!--android:textColor="@color/colorPrimaryText"-->
+    <!--android:textSize="18sp"-->
+    <!--app:layout_constraintBottom_toBottomOf="parent"-->
+    <!--app:layout_constraintLeft_toLeftOf="parent"-->
+    <!--app:layout_constraintRight_toRightOf="parent"-->
+    <!--app:layout_constraintTop_toTopOf="parent"-->
+    <!--app:layout_constraintVertical_bias="0.33999997"/>-->
+
+    <!--<TextView-->
+    <!--android:id="@+id/cardValue"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_marginLeft="8dp"-->
+    <!--android:layout_marginRight="8dp"-->
+    <!--android:layout_marginTop="8dp"-->
+    <!--android:text="value"-->
+    <!--android:textColor="@color/colorPrimaryText"-->
+    <!--android:textSize="18sp"-->
+    <!--app:layout_constraintLeft_toLeftOf="@+id/cardSuit"-->
+    <!--app:layout_constraintRight_toRightOf="@+id/cardSuit"-->
+    <!--app:layout_constraintTop_toBottomOf="@+id/cardSuit"/>-->
+    <!--</android.support.constraint.ConstraintLayout>-->
+    <ImageView
+        android:id="@+id/cardImageView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <TextView
-            android:id="@+id/cardSuit"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginTop="8dp"
-            android:text="suit"
-            android:textColor="@color/colorPrimaryText"
-            android:textSize="18sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.33999997"/>
-
-        <TextView
-            android:id="@+id/cardValue"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginTop="8dp"
-            android:text="value"
-            android:textColor="@color/colorPrimaryText"
-            android:textSize="18sp"
-            app:layout_constraintLeft_toLeftOf="@+id/cardSuit"
-            app:layout_constraintRight_toRightOf="@+id/cardSuit"
-            app:layout_constraintTop_toBottomOf="@+id/cardSuit"/>
-    </android.support.constraint.ConstraintLayout>
+        android:layout_height="match_parent"
+        app:srcCompat="@drawable/ten_of_clubs"/>
 </android.support.v7.widget.CardView>

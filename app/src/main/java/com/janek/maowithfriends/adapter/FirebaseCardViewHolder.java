@@ -2,19 +2,21 @@ package com.janek.maowithfriends.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.janek.maowithfriends.R;
 import com.janek.maowithfriends.model.Card;
+import com.squareup.picasso.Picasso;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
 public class FirebaseCardViewHolder extends RecyclerView.ViewHolder {
-    @BindView(R.id.cardSuit) TextView cardSuit;
-    @BindView(R.id.cardValue) TextView cardValue;
+    @BindView(R.id.cardImageView) ImageView cardImageView;
 
     public View cardView;
 
@@ -28,7 +30,7 @@ public class FirebaseCardViewHolder extends RecyclerView.ViewHolder {
     }
 
     public void bindCard(Card card) {
-        cardSuit.setText(card.getSuit().toString());
-        cardValue.setText(card.getValue().toString());
+        int cardImgResource = context.getResources().getIdentifier(card.cardImage(), "drawable", context.getPackageName());
+        Picasso.with(context).load(cardImgResource).into(cardImageView);
     }
 }
