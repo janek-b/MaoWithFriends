@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
 
     private FirebaseIndexRecyclerAdapter mFirebaseAdapter;
 
+    private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseAuth mAuth;
     private FirebaseUser currentUser;
     private DatabaseReference rootRef;
@@ -40,11 +41,36 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         mAuth = FirebaseAuth.getInstance();
-        currentUser = mAuth.getCurrentUser();
+        mAuthListener = this::authListen;
         rootRef = FirebaseDatabase.getInstance().getReference();
-        playerGameListRef = rootRef.child(String.format(Constants.FIREBASE_USER_ALL_GAMES_REF, currentUser.getUid()));
-        gameRef = rootRef.child(Constants.FIREBASE_GAME_REF);
-        setUpGameList();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mFirebaseAdapter.cleanup();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mAuthListener != null) mAuth.removeAuthStateListener(mAuthListener);
+    }
+
+    public void authListen(FirebaseAuth firebaseAuth) {
+        currentUser = firebaseAuth.getCurrentUser();
+        if (currentUser != null) {
+            getSupportActionBar().setTitle("Welcome " + currentUser.getDisplayName());
+            playerGameListRef = rootRef.child(String.format(Constants.FIREBASE_USER_ALL_GAMES_REF, currentUser.getUid()));
+            gameRef = rootRef.child(Constants.FIREBASE_GAME_REF);
+            setUpGameList();
+        }
     }
 
     private void setUpGameList() {
@@ -57,12 +83,6 @@ public class MainActivity extends AppCompatActivity {
         gameListRecyclerView.setHasFixedSize(true);
         gameListRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         gameListRecyclerView.setAdapter(mFirebaseAdapter);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mFirebaseAdapter.cleanup();
     }
 
     @Override

@@ -98,7 +98,7 @@ public class CreateGameActivity extends AppCompatActivity {
         disposable.add(players.scan(new ArrayList<User>(), (list, user) -> {
             list.add(user);
             return list;
-        }).subscribe(playerList -> startGameBtn.setEnabled(playerList.size() > 1)));
+        }).subscribe(playerList -> startGameBtn.setEnabled(playerList.size() > 0)));
 
     }
 
