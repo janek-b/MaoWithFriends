@@ -1,22 +1,15 @@
 package com.janek.maowithfriends.ui;
 
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.firebase.ui.database.FirebaseListAdapter;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -29,23 +22,19 @@ import com.google.firebase.database.ValueEventListener;
 import com.janek.maowithfriends.Constants;
 import com.janek.maowithfriends.R;
 import com.janek.maowithfriends.adapter.FirebasePlayerHandAdapter;
-import com.janek.maowithfriends.adapter.FirebasePlayerTurnViewHolder;
+import com.janek.maowithfriends.adapter.PlayerTurnAdapter;
 import com.janek.maowithfriends.model.Card;
 import com.janek.maowithfriends.model.Game;
-import com.janek.maowithfriends.model.Player;
 
 import org.parceler.Parcels;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.reactivex.subjects.ReplaySubject;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.subjects.BehaviorSubject;
 
 public class GameActivity extends AppCompatActivity {
-    @BindView(R.id.currentTurnPlayer) TextView currentTurnPlayer;
     @BindView(R.id.playerHandRecycleView) RecyclerView playerHandRecyclerView;
     @BindView(R.id.nextTurnBtn) Button nextTurnBtn;
     @BindView(R.id.discardCardSuit) TextView discardCardSuit;
@@ -55,7 +44,7 @@ public class GameActivity extends AppCompatActivity {
     @BindView(R.id.playersLayout) RecyclerView playersLayout;
 
     private FirebasePlayerHandAdapter firebasePlayerHandAdapter;
-    private FirebaseRecyclerAdapter firebaseListAdapter;
+    private PlayerTurnAdapter playerTurnAdapter;
 
     private FirebaseAuth mAuth;
     private FirebaseUser currentUser;
@@ -63,7 +52,9 @@ public class GameActivity extends AppCompatActivity {
     private DatabaseReference rootRef;
     private Game currentGame;
 
-    private ReplaySubject gameSubject = ReplaySubject.create();
+    private BehaviorSubject<Game> gameSubject = BehaviorSubject.create();
+
+    private CompositeDisposable disposable = new CompositeDisposable();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,41 +67,50 @@ public class GameActivity extends AppCompatActivity {
         currentUser = mAuth.getCurrentUser();
         uid = currentUser.getUid();
         rootRef = FirebaseDatabase.getInstance().getReference();
-        Query playerHandRef = rootRef.child(String.format(Constants.FIREBASE_PLAYER_HAND_REF, currentGame.getGameId(), uid));
-        DatabaseReference playerRef = rootRef.child(Constants.FIREBASE_GAME_REF).child(currentGame.getGameId()).child("players");
 
-        firebaseListAdapter = new FirebaseRecyclerAdapter<Player, FirebasePlayerTurnViewHolder>(Player.class, R.layout.player_turn_indicator,FirebasePlayerTurnViewHolder.class, playerRef) {
-            @Override
-            protected void populateViewHolder(FirebasePlayerTurnViewHolder viewHolder, Player model, int position) {
-                gameSubject.subscribe(game -> viewHolder.bindPlayer(model, (Game) game));
+        setUpAdapters();
+
+        rootRef.child(Constants.FIREBASE_GAME_REF).child(currentGame.getGameId()).addValueEventListener(new ValueEventListener() {
+            @Override public void onDataChange(DataSnapshot dataSnapshot) {
+                gameSubject.onNext(dataSnapshot.getValue(Game.class));
             }
-        };
-        playersLayout.setAdapter(firebaseListAdapter);
-        playersLayout.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+            @Override public void onCancelled(DatabaseError databaseError) {}
+        });
+
+        disposable.add(gameSubject.subscribe(game -> {
+            currentGame = game;
+            playerTurnAdapter.updateGame(game);
+            setGameState();
+        }));
+    }
+
+    private void setUpAdapters() {
+        // Player Turn Adapter
+        playerTurnAdapter = new PlayerTurnAdapter(currentGame, uid);
+        playersLayout.setAdapter(playerTurnAdapter);
+        playersLayout.setLayoutManager(new GridLayoutManager(this, currentGame.getPlayers().size()));
         playersLayout.setHasFixedSize(true);
 
+        // Player Hand Adapter
+        Query playerHandRef = rootRef.child(String.format(Constants.FIREBASE_PLAYER_HAND_REF, currentGame.getGameId(), uid));
         firebasePlayerHandAdapter = new FirebasePlayerHandAdapter(playerHandRef, this);
         playerHandRecyclerView.setAdapter(firebasePlayerHandAdapter);
         playerHandRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         playerHandRecyclerView.setHasFixedSize(true);
-
-        setGameState();
-
-        rootRef.child(Constants.FIREBASE_GAME_REF).child(currentGame.getGameId()).addValueEventListener(new ValueEventListener() {
-            @Override public void onDataChange(DataSnapshot dataSnapshot) {
-                Game game = dataSnapshot.getValue(Game.class);
-                currentGame = game;
-                gameSubject.onNext(currentGame);
-                setGameState();
-            }
-            @Override public void onCancelled(DatabaseError databaseError) {}
-        });
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         firebasePlayerHandAdapter.cleanup();
+        disposable.clear();
+    }
+
+    private void setGameState() {
+        updateDiscardCard(currentGame.topDiscardCard());
+        cardsLeft.setText(String.format("Cards Left: %d", currentGame.getDeck().size()));
+        cardsDiscarded.setText(String.format("Cards discarded: %d", currentGame.getDiscard().size()));
+        checkEndGame();
     }
 
     public void playCard(int index) {
@@ -126,14 +126,6 @@ public class GameActivity extends AppCompatActivity {
                 Toast.makeText(this, "You have no valid cards in hand, draw a new card", Toast.LENGTH_SHORT).show();
             }
         }
-    }
-
-    private void setGameState() {
-        updateTurnIndicator();
-        updateDiscardCard(currentGame.topDiscardCard());
-        cardsLeft.setText(String.format("Cards Left: %d", currentGame.getDeck().size()));
-        cardsDiscarded.setText(String.format("Cards discarded: %d", currentGame.getDiscard().size()));
-        checkEndGame();
     }
 
     @OnClick(R.id.nextTurnBtn)
@@ -158,14 +150,6 @@ public class GameActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, "It is not your turn", Toast.LENGTH_SHORT).show();
             return false;
-        }
-    }
-
-    private void updateTurnIndicator() {
-        if (currentGame.getCurrentPlayer().equals(uid)) {
-            currentTurnPlayer.setText("Your turn");
-        } else {
-            currentTurnPlayer.setText(currentGame.currentTurnPlayer().getName());
         }
     }
 
