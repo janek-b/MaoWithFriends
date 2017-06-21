@@ -113,8 +113,19 @@ public class Game {
     }
 
     public void startGame() {
-        this.deck = Game.createNewDeck();
+//        this.deck = Game.createNewDeck();
         this.nextPlayerTurn = Game.calculateTurns(getPlayers());
+        startRound();
+//        this.gameOver = false;
+//        dealCards();
+//        if (this.discard.size() == 0) {
+//            this.discard.add(drawCard());
+//        }
+    }
+
+    private void startRound() {
+        this.deck = Game.createNewDeck();
+        this.discard = new ArrayList<>();
         this.gameOver = false;
         dealCards();
         if (this.discard.size() == 0) {
@@ -188,6 +199,12 @@ public class Game {
             }
         }
         return false;
+    }
+
+    public void newRound() {
+        // TODO: implement score tracking here
+        startRound();
+        updateGameState();
     }
 
     public void endGame() {

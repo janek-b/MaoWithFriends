@@ -88,7 +88,7 @@ public class CreateGameActivity extends AppCompatActivity {
     public void authListen(FirebaseAuth firebaseAuth) {
         currentUser = firebaseAuth.getCurrentUser();
         if (currentUser != null) {
-            getSupportActionBar().setTitle(StringUtils.toTitleCase(currentUser.getDisplayName()));
+            getSupportActionBar().setTitle("Invite Your Friends");
             setUpPlayerSearch();
         }
     }

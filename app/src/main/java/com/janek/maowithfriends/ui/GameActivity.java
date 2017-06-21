@@ -51,6 +51,9 @@ public class GameActivity extends AppCompatActivity {
     private FirebasePlayerHandAdapter firebasePlayerHandAdapter;
     private PlayerTurnAdapter playerTurnAdapter;
 
+    private FragmentManager fm;
+    private GameOverDialogFragment gameOverDialogFragment;
+
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseUser currentUser;
@@ -72,6 +75,7 @@ public class GameActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         mAuthListener = this::authListen;
         rootRef = FirebaseDatabase.getInstance().getReference();
+
     }
 
     @Override
@@ -103,6 +107,11 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void setUpGameState() {
+        fm = getSupportFragmentManager();
+        gameOverDialogFragment = new GameOverDialogFragment();
+        boolean outcome = (currentGame.getPlayers().get(uid).getHand().size() == 0);
+        gameOverDialogFragment.setOutcome(outcome);
+
         setUpAdapters();
 
         rootRef.child(Constants.FIREBASE_GAMES_REF).child(currentGame.getGameId()).addValueEventListener(new ValueEventListener() {
@@ -161,11 +170,15 @@ public class GameActivity extends AppCompatActivity {
 
     private void checkRoundOver() {
         if (currentGame.roundOver()) {
-            FragmentManager fm = getSupportFragmentManager();
-            GameOverDialogFragment gameOverDialogFragment = new GameOverDialogFragment();
+//            FragmentManager fm = getSupportFragmentManager();
+//            GameOverDialogFragment gameOverDialogFragment = new GameOverDialogFragment();
             boolean outcome = (currentGame.getPlayers().get(uid).getHand().size() == 0);
             gameOverDialogFragment.setOutcome(outcome);
             gameOverDialogFragment.show(fm, "Game Over Fragment");
+        } else {
+            try {
+                gameOverDialogFragment.dismiss();
+            } catch (NullPointerException e) {}
         }
     }
 
@@ -211,6 +224,10 @@ public class GameActivity extends AppCompatActivity {
 
     public void endGame() {
         currentGame.endGame();
+    }
+
+    public void newRound() {
+        currentGame.newRound();
     }
 
     public void quitGame() {
