@@ -20,22 +20,21 @@ public class GameOverDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         if (this.won) {
-            builder.setTitle("You Won");
+            builder.setTitle("Round Over. You Won!");
         } else {
-            builder.setTitle("You Lost");
+            builder.setTitle("Round Over.");
         }
-        builder.setMessage("Play again?");
+        builder.setMessage("Play another Round?");
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override public void onClick(DialogInterface dialog, int which) {
-                dismiss();
+                ((GameActivity)getActivity()).newRound();
+//                dismiss();
                 // TODO: add new game method;
             }
         });
         builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
             @Override public void onClick(DialogInterface dialog, int which) {
                 ((GameActivity)getActivity()).endGame();
-//                dismiss();
-                // TODO: add quit game method;
             }
         });
         return builder.create();
