@@ -46,11 +46,9 @@ import io.reactivex.subjects.BehaviorSubject;
 public class GameActivity extends AppCompatActivity {
     @BindView(R.id.playerHandRecycleView) RecyclerView playerHandRecyclerView;
     @BindView(R.id.playersLayout) RecyclerView playersLayout;
-    @BindView(R.id.nextTurnBtn) Button nextTurnBtn;
     @BindView(R.id.cardsLeft) TextView cardsLeft;
     @BindView(R.id.cardsDiscarded) TextView cardsDiscarded;
     @BindView(R.id.discardCardImageView) ImageView discardCardImageView;
-//    @BindView(R.id.discardPile) CardView discardPile;
 
 
     private FirebasePlayerHandAdapter firebasePlayerHandAdapter;
@@ -184,11 +182,6 @@ public class GameActivity extends AppCompatActivity {
                 gameOverDialogFragment.dismiss();
             } catch (NullPointerException e) {}
         }
-    }
-
-    @OnClick(R.id.nextTurnBtn)
-    public void nextTurn() {
-        currentGame.nextTurn();
     }
 
     @OnClick(R.id.drawCardPile)
