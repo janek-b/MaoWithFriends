@@ -5,6 +5,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:clipChildren="false"
+    android:clipToPadding="false"
     tools:context="com.janek.maowithfriends.ui.GameActivity">
 
     <android.support.constraint.Guideline
@@ -14,6 +16,41 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_end="181dp"
         />
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/drawCardPile"
+        android:layout_width="100dp"
+        android:layout_height="145dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="8dp"
+        app:cardBackgroundColor="@color/colorPrimaryDark"
+        app:cardCornerRadius="4dp"
+        app:cardElevation="5dp"
+        app:contentPadding="4dp"
+        app:layout_constraintBottom_toBottomOf="@+id/relativeLayout"
+        app:layout_constraintEnd_toStartOf="@+id/guideline2"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/guideline2"
+        app:layout_constraintTop_toTopOf="@+id/relativeLayout">
+
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center"
+            android:text="Draw Card"
+            android:textAlignment="center"
+            android:textColor="@color/colorTextIcons"
+            android:textSize="18sp"
+            android:textStyle="bold"/>
+
+    </android.support.v7.widget.CardView>
 
     <RelativeLayout
         android:layout_width="wrap_content"
@@ -82,6 +119,8 @@
         android:id="@+id/playerHandRecycleView"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -96,40 +135,7 @@
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.5"/>
 
-    <android.support.v7.widget.CardView
-        android:id="@+id/drawCardPile"
-        android:layout_width="100dp"
-        android:layout_height="145dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginTop="8dp"
-        app:cardBackgroundColor="@color/colorPrimaryDark"
-        app:cardCornerRadius="4dp"
-        app:cardElevation="5dp"
-        app:contentPadding="4dp"
-        app:layout_constraintBottom_toBottomOf="@+id/relativeLayout"
-        app:layout_constraintEnd_toStartOf="@+id/guideline2"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@+id/guideline2"
-        app:layout_constraintTop_toTopOf="@+id/relativeLayout">
 
-        <TextView
-            android:id="@+id/textView4"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:layout_gravity="center"
-            android:text="Draw Card"
-            android:textAlignment="center"
-            android:textColor="@color/colorTextIcons"
-            android:textSize="18sp"
-            android:textStyle="bold"/>
-
-    </android.support.v7.widget.CardView>
 
 
 </android.support.constraint.ConstraintLayout>

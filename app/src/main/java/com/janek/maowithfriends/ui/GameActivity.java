@@ -10,6 +10,7 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -30,6 +31,8 @@ import com.janek.maowithfriends.adapter.FirebasePlayerHandAdapter;
 import com.janek.maowithfriends.adapter.PlayerTurnAdapter;
 import com.janek.maowithfriends.model.Card;
 import com.janek.maowithfriends.model.Game;
+import com.janek.maowithfriends.util.OnStartDragListener;
+import com.janek.maowithfriends.util.SimpleItemTouchHelperCallback;
 import com.janek.maowithfriends.util.StringUtils;
 import com.squareup.picasso.Picasso;
 
@@ -43,13 +46,14 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.subjects.BehaviorSubject;
 
-public class GameActivity extends AppCompatActivity {
+public class GameActivity extends AppCompatActivity implements OnStartDragListener{
     @BindView(R.id.playerHandRecycleView) RecyclerView playerHandRecyclerView;
     @BindView(R.id.playersLayout) RecyclerView playersLayout;
     @BindView(R.id.cardsLeft) TextView cardsLeft;
     @BindView(R.id.cardsDiscarded) TextView cardsDiscarded;
     @BindView(R.id.discardCardImageView) ImageView discardCardImageView;
 
+    private ItemTouchHelper itemTouchHelper;
 
     private FirebasePlayerHandAdapter firebasePlayerHandAdapter;
     private PlayerTurnAdapter playerTurnAdapter;
@@ -81,6 +85,11 @@ public class GameActivity extends AppCompatActivity {
 
         fm = getSupportFragmentManager();
         gameOverDialogFragment = new GameOverDialogFragment();
+    }
+
+    @Override
+    public void onStartDrag(RecyclerView.ViewHolder viewHolder) {
+        itemTouchHelper.startDrag(viewHolder);
     }
 
     @Override
@@ -150,7 +159,7 @@ public class GameActivity extends AppCompatActivity {
 
         // Player Hand Adapter
         Query playerHandRef = rootRef.child(String.format(Constants.FIREBASE_PLAYER_HAND_REF, currentGame.getGameId(), uid));
-        firebasePlayerHandAdapter = new FirebasePlayerHandAdapter(playerHandRef, this);
+        firebasePlayerHandAdapter = new FirebasePlayerHandAdapter(playerHandRef, this, this);
         playerHandRecyclerView.setAdapter(firebasePlayerHandAdapter);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
 //        linearLayoutManager.setStackFromEnd(true);
@@ -158,6 +167,10 @@ public class GameActivity extends AppCompatActivity {
         playerHandRecyclerView.setLayoutManager(linearLayoutManager);
         playerHandRecyclerView.setHasFixedSize(true);
         playerHandRecyclerView.addItemDecoration(new CardOverlapDecoration());
+
+        ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(firebasePlayerHandAdapter);
+        itemTouchHelper = new ItemTouchHelper(callback);
+        itemTouchHelper.attachToRecyclerView(playerHandRecyclerView);
     }
 
     private void setGameState() {
