@@ -31,6 +31,6 @@ public class FirebaseCardViewHolder extends RecyclerView.ViewHolder {
 
     public void bindCard(Card card) {
         int cardImgResource = context.getResources().getIdentifier(card.cardImage(), "drawable", context.getPackageName());
-        Picasso.with(context).load(cardImgResource).into(cardImageView);
+        Picasso.with(context).load(cardImgResource).fit().into(cardImageView);
     }
 }

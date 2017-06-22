@@ -3,6 +3,9 @@ package com.janek.maowithfriends.adapter;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.Query;

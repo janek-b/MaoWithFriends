@@ -2,8 +2,11 @@ package com.janek.maowithfriends.ui;
 
 import android.content.Intent;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -22,6 +25,7 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.janek.maowithfriends.Constants;
 import com.janek.maowithfriends.R;
+import com.janek.maowithfriends.adapter.CardOverlapDecoration;
 import com.janek.maowithfriends.adapter.FirebasePlayerHandAdapter;
 import com.janek.maowithfriends.adapter.PlayerTurnAdapter;
 import com.janek.maowithfriends.model.Card;
@@ -46,6 +50,7 @@ public class GameActivity extends AppCompatActivity {
     @BindView(R.id.cardsLeft) TextView cardsLeft;
     @BindView(R.id.cardsDiscarded) TextView cardsDiscarded;
     @BindView(R.id.discardCardImageView) ImageView discardCardImageView;
+//    @BindView(R.id.discardPile) CardView discardPile;
 
 
     private FirebasePlayerHandAdapter firebasePlayerHandAdapter;
@@ -150,11 +155,11 @@ public class GameActivity extends AppCompatActivity {
         firebasePlayerHandAdapter = new FirebasePlayerHandAdapter(playerHandRef, this);
         playerHandRecyclerView.setAdapter(firebasePlayerHandAdapter);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
-        linearLayoutManager.setStackFromEnd(true);
-        linearLayoutManager.setReverseLayout(true);
+//        linearLayoutManager.setStackFromEnd(true);
+//        linearLayoutManager.setReverseLayout(true);
         playerHandRecyclerView.setLayoutManager(linearLayoutManager);
-//        playerHandRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         playerHandRecyclerView.setHasFixedSize(true);
+        playerHandRecyclerView.addItemDecoration(new CardOverlapDecoration());
     }
 
     private void setGameState() {
