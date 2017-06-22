@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseAuth mAuth;
     private FirebaseUser currentUser;
+    private String uid;
     private DatabaseReference rootRef;
     private Query playerGameListRef;
     private Query gameRef;
@@ -68,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
     public void authListen(FirebaseAuth firebaseAuth) {
         currentUser = firebaseAuth.getCurrentUser();
         if (currentUser != null) {
+            uid = currentUser.getUid();
             getSupportActionBar().setTitle("Welcome " + StringUtils.toTitleCase(currentUser.getDisplayName()));
             playerGameListRef = rootRef.child(String.format(Constants.FIREBASE_USER_ALL_GAMES_REF, currentUser.getUid())).orderByValue().equalTo(true);
             gameRef = rootRef.child(Constants.FIREBASE_GAMES_REF);
@@ -79,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
         mFirebaseAdapter = new FirebaseIndexRecyclerAdapter<Game, FirebaseGameListViewHolder>(Game.class, R.layout.game_list_item, FirebaseGameListViewHolder.class, playerGameListRef, gameRef) {
             @Override
             protected void populateViewHolder(FirebaseGameListViewHolder viewHolder, Game model, int position) {
-                viewHolder.bindGame(model);
+                viewHolder.bindGame(model, uid);
             }
         };
         gameListRecyclerView.setHasFixedSize(true);

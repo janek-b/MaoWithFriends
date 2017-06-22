@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">MaoWithFriends</string>
+    <string name="gameListInvitation">Invitation from:</string>
+    <string name="gameListPlayerListLabel">Game with:</string>
 </resources>

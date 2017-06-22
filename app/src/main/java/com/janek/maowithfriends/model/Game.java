@@ -16,6 +16,7 @@ import java.util.Map;
 public class Game {
     String gameId;
     String currentPlayer;
+    String gameCreator;
     Map<String, Player> players = new HashMap<>();
     Map<String, String> nextPlayerTurn = new HashMap<>();
     List<Card> deck = new ArrayList<>();
@@ -28,6 +29,7 @@ public class Game {
     public Game(String gameId, String currentPlayer) {
         this.gameId = gameId;
         this.currentPlayer = currentPlayer;
+        this.gameCreator = currentPlayer;
     }
 
     public String getGameId() {
@@ -52,6 +54,10 @@ public class Game {
 
     public int getPenalty() {
         return penalty;
+    }
+
+    public String getGameCreator() {
+        return gameCreator;
     }
 
     public boolean isGameOver() {
