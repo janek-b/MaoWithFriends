@@ -10,6 +10,9 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.DragEvent;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -81,6 +84,25 @@ public class GameActivity extends AppCompatActivity {
 
         fm = getSupportFragmentManager();
         gameOverDialogFragment = new GameOverDialogFragment();
+
+
+        discardCardImageView.setOnDragListener(new View.OnDragListener() {
+            @Override
+            public boolean onDrag(View v, DragEvent event) {
+                switch (event.getAction()) {
+                    case DragEvent.ACTION_DRAG_STARTED:
+                        return true;
+
+                    case DragEvent.ACTION_DROP:
+                        Log.d("test", "dropped on image");
+
+                        return true;
+                    case DragEvent.ACTION_DRAG_ENDED:
+                        return false;
+                }
+                return false;
+            }
+        });
     }
 
     @Override

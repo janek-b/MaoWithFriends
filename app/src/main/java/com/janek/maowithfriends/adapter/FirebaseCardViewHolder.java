@@ -3,6 +3,7 @@ package com.janek.maowithfriends.adapter;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.DragEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -27,6 +28,22 @@ public class FirebaseCardViewHolder extends RecyclerView.ViewHolder {
         cardView = itemView;
         ButterKnife.bind(this, itemView);
         this.context = itemView.getContext();
+
+        itemView.setOnDragListener(new View.OnDragListener() {
+            @Override
+            public boolean onDrag(View v, DragEvent event) {
+                if (event.getAction() == DragEvent.ACTION_DRAG_STARTED) {
+                    Log.d("test", "started");
+                    v.setVisibility(View.GONE);
+                }
+                if (event.getAction() == DragEvent.ACTION_DROP) {
+                    Log.d("test", "stopped");
+
+                    v.setVisibility(View.VISIBLE);
+                }
+                return false;
+            }
+        });
     }
 
     public void bindCard(Card card) {
