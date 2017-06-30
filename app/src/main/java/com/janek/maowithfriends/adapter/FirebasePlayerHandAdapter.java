@@ -49,19 +49,16 @@ public class FirebasePlayerHandAdapter extends FirebaseRecyclerAdapter<Card, Fir
     @Override
     protected void populateViewHolder(FirebaseCardViewHolder viewHolder, Card model, int position) {
         viewHolder.bindCard(model);
-        viewHolder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                v.setVisibility(View.GONE);
-                ClipData dragData = ClipData.newPlainText("position", Integer.toString(viewHolder.getAdapterPosition()));
-                View.DragShadowBuilder myShadow = new View.DragShadowBuilder(v);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    v.startDragAndDrop(dragData, myShadow, v, 0);
-                } else {
-                    v.startDrag(dragData, myShadow, v, 0);
-                }
-                return false;
+        viewHolder.itemView.setOnLongClickListener(v -> {
+            v.setVisibility(View.GONE);
+            ClipData dragData = ClipData.newPlainText("position", Integer.toString(viewHolder.getAdapterPosition()));
+            View.DragShadowBuilder myShadow = new View.DragShadowBuilder(v);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                v.startDragAndDrop(dragData, myShadow, v, 0);
+            } else {
+                v.startDrag(dragData, myShadow, v, 0);
             }
+            return false;
         });
     }
 

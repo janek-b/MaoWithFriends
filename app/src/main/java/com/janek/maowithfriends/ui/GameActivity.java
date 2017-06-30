@@ -26,6 +26,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.jakewharton.rxbinding2.view.RxView;
 import com.janek.maowithfriends.Constants;
 import com.janek.maowithfriends.R;
 import com.janek.maowithfriends.adapter.CardOverlapDecoration;
@@ -85,24 +86,17 @@ public class GameActivity extends AppCompatActivity {
         fm = getSupportFragmentManager();
         gameOverDialogFragment = new GameOverDialogFragment();
 
-
-        discardCardImageView.setOnDragListener(new View.OnDragListener() {
-            @Override
-            public boolean onDrag(View v, DragEvent event) {
-                switch (event.getAction()) {
-                    case DragEvent.ACTION_DRAG_STARTED:
-                        return true;
-                    case DragEvent.ACTION_DROP:
-                        int cardPosition = Integer.parseInt(event.getClipData().getItemAt(0).getText().toString());
-                        return playCard(cardPosition);
-                    case DragEvent.ACTION_DRAG_ENDED:
-                        if (!event.getResult()) {
-                            firebasePlayerHandAdapter.resetVisibility();
-                        }
-                        return false;
-                }
-                return false;
+        discardCardImageView.setOnDragListener((v, event) -> {
+            switch (event.getAction()) {
+                case DragEvent.ACTION_DRAG_STARTED:
+                    return true;
+                case DragEvent.ACTION_DROP:
+                    int cardPosition = Integer.parseInt(event.getClipData().getItemAt(0).getText().toString());
+                    return playCard(cardPosition);
+                case DragEvent.ACTION_DRAG_ENDED:
+                    if (!event.getResult()) firebasePlayerHandAdapter.resetVisibility();
             }
+            return false;
         });
     }
 
@@ -176,8 +170,6 @@ public class GameActivity extends AppCompatActivity {
         firebasePlayerHandAdapter = new FirebasePlayerHandAdapter(playerHandRef, this);
         playerHandRecyclerView.setAdapter(firebasePlayerHandAdapter);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
-//        linearLayoutManager.setStackFromEnd(true);
-//        linearLayoutManager.setReverseLayout(true);
         playerHandRecyclerView.setLayoutManager(linearLayoutManager);
         playerHandRecyclerView.setHasFixedSize(true);
         playerHandRecyclerView.addItemDecoration(new CardOverlapDecoration());
