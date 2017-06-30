@@ -92,12 +92,13 @@ public class GameActivity extends AppCompatActivity {
                 switch (event.getAction()) {
                     case DragEvent.ACTION_DRAG_STARTED:
                         return true;
-
                     case DragEvent.ACTION_DROP:
-                        Log.d("test", "dropped on image");
-
-                        return true;
+                        int cardPosition = Integer.parseInt(event.getClipData().getItemAt(0).getText().toString());
+                        return playCard(cardPosition);
                     case DragEvent.ACTION_DRAG_ENDED:
+                        if (!event.getResult()) {
+                            firebasePlayerHandAdapter.resetVisibility();
+                        }
                         return false;
                 }
                 return false;
@@ -217,12 +218,13 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
-    public void playCard(int index) {
+    public boolean playCard(int index) {
         if (checkPlayerTurn()) {
             if (currentGame.validCardInHand(uid)) {
                 Card playedCard = currentGame.currentTurnPlayer().getHand().get(index);
                 if (currentGame.validCard(playedCard)) {
                     currentGame.playCard(uid, index);
+                    return true;
                 } else {
                     Toast.makeText(this, "Card must be of the same suit or value", Toast.LENGTH_SHORT).show();
                 }
@@ -230,6 +232,7 @@ public class GameActivity extends AppCompatActivity {
                 Toast.makeText(this, "You have no valid cards in hand, draw a new card", Toast.LENGTH_SHORT).show();
             }
         }
+        return false;
     }
 
     private boolean checkPlayerTurn() {

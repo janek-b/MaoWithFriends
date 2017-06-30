@@ -7,6 +7,7 @@ import android.os.Build;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.DragEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -45,74 +46,29 @@ public class FirebasePlayerHandAdapter extends FirebaseRecyclerAdapter<Card, Fir
         previousCont = getItemCount();
     }
 
-
-//    @Override
-//    public FirebaseCardViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-//        FirebaseCardViewHolder viewHolder = super.onCreateViewHolder(parent, viewType);
-//        viewHolder.cardView.setOnLongClickListener(new View.OnLongClickListener() {
-//            @Override
-//            public boolean onLongClick(View v) {
-//                ClipData.Item item = new ClipData.Item((CharSequence) v.getTag());
-//                String[] mimeTypes = {ClipDescription.MIMETYPE_TEXT_PLAIN};
-//                ClipData dragData = new ClipData(v.getTag().toString(),
-//                        mimeTypes, item);
-//                v.setVisibility(View.GONE);
-//                View.DragShadowBuilder myShadow = new View.DragShadowBuilder(v);
-////                HeptagonDragShadowBuilder myShadow = new HeptagonDragShadowBuilder(Heptagon.this, 1.1f);
-//
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-//                    v.startDragAndDrop(dragData, myShadow, null, 0);
-//                } else {
-//                    v.startDrag(dragData, myShadow, null, 0);
-//                }
-//                return true;
-//            }
-//        });
-////        return super.onCreateViewHolder(parent, viewType);
-//        return viewHolder;
-//    }
-
     @Override
     protected void populateViewHolder(FirebaseCardViewHolder viewHolder, Card model, int position) {
         viewHolder.bindCard(model);
-        viewHolder.cardView.setOnClickListener(view -> {
-            ((GameActivity)context).playCard(position);
-        });
-
         viewHolder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-//                ClipData.Item item = new ClipData.Item((CharSequence) v.getTag());
-//                String[] mimeTypes = {ClipDescription.MIMETYPE_TEXT_PLAIN};
-//                ClipData dragData = new ClipData(v.getTag().toString(),
-//                        mimeTypes, item);
                 v.setVisibility(View.GONE);
-                ClipData dragData = ClipData.newPlainText("", "");
+                ClipData dragData = ClipData.newPlainText("position", Integer.toString(viewHolder.getAdapterPosition()));
                 View.DragShadowBuilder myShadow = new View.DragShadowBuilder(v);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     v.startDragAndDrop(dragData, myShadow, v, 0);
                 } else {
                     v.startDrag(dragData, myShadow, v, 0);
                 }
-                return true;
+                return false;
             }
         });
-
-//        viewHolder.itemView.setOnDragListener(new View.OnDragListener() {
-//            @Override
-//            public boolean onDrag(View v, DragEvent event) {
-//                if (event.getAction() == DragEvent.ACTION_DRAG_STARTED) {
-//                    Log.d("test", "started");
-//                    v.setVisibility(View.GONE);
-//                }
-//                if (event.getAction() == DragEvent.ACTION_DROP) {
-//                    Log.d("test", "stopped");
-//
-//                    v.setVisibility(View.VISIBLE);
-//                }
-//                return false;
-//            }
-//        });
     }
 
+    public void resetVisibility() {
+        int total = getItemCount();
+        for (int i = 0; i < total; i++) {
+            recyclerView.findViewHolderForAdapterPosition(i).itemView.setVisibility(View.VISIBLE);
+        }
+    }
 }
